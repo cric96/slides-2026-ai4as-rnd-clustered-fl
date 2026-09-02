@@ -82,13 +82,3 @@ Classi di utility CSS pronte all'uso: `mark-teal/orange/green` (evidenziazioni),
 6. Il deploy su GitHub Pages è già pronto in
    `.github/workflows/deploy-slides.yml`: basta pushare su `main` con questo
    repo pubblico e le Pages configurate su "GitHub Actions".
-
-## Cosa NON è stato portato dal deck originale (di proposito)
-
-Componenti legati al contenuto specifico della ricerca (`AggregateFlow.vue`,
-`ArchitectureOverview.vue`, `ChannelEvolution.vue`, `FederatedLearningStep.vue`,
-`FieldEvolution.vue`, `FlockingStages.vue`, `LocalRoundLoop.vue`,
-`PhyeldsLogo.vue`) non sono stati copiati: sono illustrazioni ad hoc per
-quella presentazione, non riusabili in generale. `FlowDiagram.vue` copre lo
-stesso bisogno (uno stage-diagram animato) in forma parametrica.
-# template-slidev
