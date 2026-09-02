@@ -1,10 +1,6 @@
 # Slidev reusable template
 
-Template riusabile per presentazioni [Slidev](https://sli.dev), estratto dal
-tema/design system usato in `slides-2026-coordination-phyelds`, ma ripulito
-da tutti i contenuti e componenti specifici di quella ricerca (diagrammi
-animati sul field-calculus, logo del progetto, riferimenti, ecc.).
-
+Template riusabile per presentazioni [Slidev](https://sli.dev).
 ## Cosa contiene
 
 ```
