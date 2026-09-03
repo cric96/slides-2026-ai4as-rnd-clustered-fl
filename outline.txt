@@ -1,0 +1,60 @@
+Presentation for Discovering Collaboration from Novelty: Random Network Distillation for Clustered Federated Learning
+
+Scenario:
+- Consider a group of webcam which forecast the traffic
+- each camera look at the joint and forecast it
+- however, differen camera may perceive more data, and this can be used to improve the forecast
+- however, sometimes, this information cannot be shared!
+- This is where federed learning comes into play
+
+- Context
+- the idea is to improve local model, without sharing the data
+- so, in doing this, the idea is to perfomr localtrianig (some ephocs)
+- then send to a server (which see only the weight of gradient)
+- combine them somehow (es. in federated avg, it is done via averaging the weights)
+- then it is shared back to the models (and continue)
+
+- Come back to the scenario:
+- consider a large scale deployment of several autonomous entities
+- they may percepive very different traffic scenario 
+	- es. in the city center, the flow may be differnet, same for the cars seen
+	- in different zones, they have different car, pattern, etc.
+- it literature, it is know that standard fedavg perform worse in this kind of situation
+	- this is know as non-IID problem
+- *Idea*: search cluster which follwo the data distribution!
+
+- Clustered federated learning
+- the idea of clustered federeted learning is to perfomr a kind of clustering to create several ad hoc model (smalelrs and personalized) in area that come back IID
+- main problem: how to perform clustering if no data is available?
+	- just preted to have K cluster and then select the best model for each client (IFCA)
+	- using proxy instead of data to approximite the underlying cluster (es. Self Federeated leanring, ACSOS).
+
+- Clurested federated leanring problem:
+- Clustering cost: most of the time, clusteirng is something that should erpform for each phase in the traniong process
+	- becase the clusterig imrpvoe over the model imrpovemeb
+- proxy cost:
+	- most of the time, the proxy metrics is extriely costin
+	- es. in self-federatd learning, the client perofrm pair wise loss estimation of the validatio test
+- Research Question: how we can create a clustered federated leranig which is lighweight but effective?
+
+- Contribution
+- We propose a novel proxy metrics and decopling clusterng mechanisms
+- We use Random network distillation (from MARL)
+- We decouple the clusterign frm the normal fedearef learning process
+
+- Random Netwoke DIstillantion
+- it is used from MARL
+- it work as follow
+- Intuition: if sharing the RND the confince is low, it means that the model perceive a different data! (so non-IDNess!)
+
+- Overall Loop
+[explain the overall loop]
+
+- Experimental Setting
+[Exaplain high level the experimental setting]
+
+- Results 
+Discuss the results and use image from the papepr
+
+- Conclusion and Future Works
+write the conclusion and future work fromt he paper
