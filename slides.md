@@ -41,14 +41,15 @@ class: viz-slide
 <div class="split-grid domain-grid">
 
 <div class="static-points">
+
 - Consider a **traffic forecasting** scenario with multiple roadside cameras.
-- Their local worlds are visibly different: queues, steady flow, event surges, and fast sparse traffic.
+- Their local worlds are visibly <u>different</u>: queues, steady flow, event surges, and fast sparse traffic.
 - The goal is to **merge what the cameras learn**, then reuse the resulting model wherever those patterns recur.
 - Raw video remains **private, regulated, or too heavy to move**: only learning can travel.
 
 <div class="value-strip">
-  <span class="value-label">The systems question</span>
-  How can one merged model carry experience back to every junction without centralizing observations?
+  <span class="value-label">The systems question:</span>
+  How can one merged model carry experience back to every junction without <u>centralizing</u> observations?
 </div>
 
 </div>
@@ -71,12 +72,13 @@ class: stage-slide top-slide
 
 <div class="slide-shell">
 
-# Federated learning shares learning — not raw data
+# Federated learning - the standard approach
+
+> a distributed learning paradigm where clients train a shared model collaboratively without sharing their raw data.
 
 <FederatedLearning :click="$clicks" />
 <div v-click="1" class="click-marker" /><div v-click="2" class="click-marker" /><div v-click="3" class="click-marker" />
 
-<p class="centered-claim">Clients <strong>train locally</strong> for a few epochs, upload only <strong>model updates</strong>, the server <strong>averages them (FedAvg)</strong> and broadcasts the result — round after round.</p>
 
 <Cites refs="1" />
 
