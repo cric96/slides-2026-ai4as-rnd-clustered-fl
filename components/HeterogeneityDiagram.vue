@@ -75,17 +75,23 @@ const currentStep = computed(() => Math.min(Math.max(0, props.click ?? 0), 3))
         <span class="step-num">1</span>
         <span class="step-txt">Network</span>
       </div>
-      <span class="step-sep">→</span>
+      <svg viewBox="0 0 16 12" class="step-sep-svg" aria-hidden="true">
+        <path d="M 2 6 L 12 6 M 8 2 L 12 6 L 8 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
       <div class="step-indicator" :class="{ current: currentStep === 1, past: currentStep > 1 }">
         <span class="step-num">2</span>
         <span class="step-txt">IID (local)</span>
       </div>
-      <span class="step-sep">→</span>
+      <svg viewBox="0 0 16 12" class="step-sep-svg" aria-hidden="true">
+        <path d="M 2 6 L 12 6 M 8 2 L 12 6 L 8 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
       <div class="step-indicator" :class="{ current: currentStep === 2, past: currentStep > 2 }">
         <span class="step-num">3</span>
         <span class="step-txt">Non-IID (cross)</span>
       </div>
-      <span class="step-sep">→</span>
+      <svg viewBox="0 0 16 12" class="step-sep-svg" aria-hidden="true">
+        <path d="M 2 6 L 12 6 M 8 2 L 12 6 L 8 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
       <div class="step-indicator" :class="{ current: currentStep === 3 }">
         <span class="step-num">4</span>
         <span class="step-txt">Clusters</span>
@@ -404,9 +410,11 @@ const currentStep = computed(() => Math.min(Math.max(0, props.click ?? 0), 3))
   font-weight: 600;
 }
 
-.step-sep {
+.step-sep-svg {
+  width: 1.15rem;
+  height: 0.85rem;
   color: var(--deck-muted);
-  font-size: 0.58rem;
-  opacity: 0.4;
+  opacity: 0.75;
+  flex-shrink: 0;
 }
 </style>

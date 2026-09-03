@@ -103,7 +103,7 @@ class: viz-slide
 
 <div class="slide-shell">
 
-# Federeted learning struggles with non-IID data
+# Federated learning struggles with non-IID data
 
 <div class="split-grid wide-visual-grid">
 
@@ -177,7 +177,7 @@ class: stage-slide top-slide
 <div class="comparison-grid bottleneck-grid">
   <div class="comparison-card">
     <div class="card-title">IFCA</div>
-    <div class="card-text"><strong>Assume K is known.</strong><br>Every client evaluates all <i>K</i> full task models at every round, then joins the best one.</div>
+    <div class="card-text"><strong>Assume <MathTex math="K" /> is known.</strong><br>Every client evaluates all <MathTex math="K" /> full task models at every round, then joins the best one.</div>
   </div>
   <div class="comparison-card">
     <div class="card-title">Self-FL / PSFL</div>
@@ -185,7 +185,12 @@ class: stage-slide top-slide
   </div>
   <div class="comparison-card highlight">
     <div class="card-title">Two coupled costs</div>
-    <div class="card-text"><strong>Clustering cost:</strong> discovery must repeat throughout training. <strong>Proxy cost:</strong> every similarity estimate runs on expensive full task models.</div>
+    <div class="card-text">
+    <ul>
+      <li><strong>Clustering cost:</strong> discovery must repeat throughout training.</li>
+      <li><strong>Proxy cost:</strong> every similarity estimate runs on expensive full task models.</li>
+    </ul>
+    </div>
   </div>
 </div>
 
@@ -218,21 +223,21 @@ class: stage-slide
   <div class="contribution-item teal-top">
     <div class="contribution-number">01</div>
     <h3>Novelty as a proxy</h3>
-    <p>Import <strong>Random Network Distillation</strong> from reinforcement learning: a tiny model whose prediction error measures how "familiar" some data is — a cheap signal of distribution compatibility.</p>
+    <p>Import <strong>Random Network Distillation</strong> from reinforcement learning: a tiny auxiliary model whose prediction error measures how "familiar" local data is — an ultra-cheap proxy for distribution shift.</p>
   </div>
   <div class="contribution-item green-top">
     <div class="contribution-number">02</div>
     <h3>Decoupled discovery</h3>
-    <p>Exchange <strong>small auxiliary predictors once</strong> — or periodically — instead of re-evaluating the full task model at every training round.</p>
+    <p>Separate clustering from the primary learning loop: discover once at <MathTex math="r=0" /> (or periodically every <MathTex math="\tau" /> rounds) instead of evaluating full models at every training round.</p>
   </div>
   <div class="contribution-item orange-top">
     <div class="contribution-number">03</div>
     <h3>Emergent federations</h3>
-    <p>Derive groups from pairwise novelty, so the <strong>number of clusters is not fixed in advance</strong>: it emerges from the observed compatibility.</p>
+    <p>Derive collaboration groups dynamically from observed pairwise novelty, so the <strong>number of clusters is not fixed in advance</strong>: it emerges from data compatibility.</p>
   </div>
 </div>
 
-<p class="centered-claim">The resulting pre-clustering phase is <strong>task-agnostic</strong> and can precede any standard FL algorithm.</p>
+<p class="centered-claim" style="margin-top: 1.4rem;">The resulting pre-clustering phase is <strong>task-agnostic</strong> and can precede any standard FL algorithm.</p>
 
 </div>
 
@@ -247,26 +252,13 @@ class: stage-slide
 
 <div class="slide-shell">
 
-# RND asks: does this input look familiar?
+# Random Network Distillation
 
 <RNDMechanism />
 
-<div class="three-up contribution-row">
-  <div class="contribution-item teal-top">
-    <h3>A fixed random target</h3>
-    <p>One randomly initialized network <strong>never trains</strong>: it defines an arbitrary but fixed "representation task" on the input.</p>
-  </div>
-  <div class="contribution-item green-top">
-    <h3>A local predictor</h3>
-    <p>A small companion network is trained <strong>only on the client's own data</strong> to mimic the frozen target.</p>
-  </div>
-  <div class="contribution-item orange-top">
-    <h3>Error = novelty</h3>
-    <p>The predictor learns what its camera usually sees: <strong>low error on familiar data</strong>, <span class="u-solid-orange">high error on anything different</span>.</p>
-  </div>
-</div>
-
-<p class="centered-claim">No data exchange needed: novelty is computed <strong>locally</strong>, from prediction error alone.</p>
+<p class="centered-claim" style="margin-top: 0.55rem;">
+  RND turns a tiny model's <strong>local learning residual</strong> into a distribution fingerprint — without labels, without data sharing, and without task-model training.
+</p>
 
 <Cites refs="5" />
 
@@ -284,32 +276,11 @@ class: stage-slide
 
 <div class="slide-shell">
 
-# Novelty becomes a compatibility test
+# From novelty to compatibility
 
-<div class="score-layout">
-  <div class="score-definition">
-    <span class="eyebrow">Client <i>i</i> evaluates predictor <i>j</i> on its own data</span>
-    <div class="score-equation">Each camera runs <strong>every peer's predictor</strong> on its private frames and keeps one number per pair: the prediction error.</div>
-  </div>
-  <div class="compatibility-axis">
-    <div class="axis-label compatible">
-      <strong>error ≈ own error</strong>
-      <span>predictor <i>j</i> finds client <i>i</i>'s data familiar</span>
-      <b>compatible distributions → same federation</b>
-    </div>
-    <div class="axis-line"><span class="axis-dot" /></div>
-    <div class="axis-label divergent">
-      <strong>error ≫ own error</strong>
-      <span>predictor <i>j</i> finds client <i>i</i>'s data novel</span>
-      <b>different distributions → separate federations</b>
-    </div>
-  </div>
-</div>
+## Estimating pairwise distributional divergence without sharing data
 
-<div class="threshold-strip">
-  <span class="value-label">Adaptive rule</span>
-  A peer is compatible if its error stays close to the client's own error — no fixed <i>K</i>: the observed matrix decides how many federations emerge.
-</div>
+<CompatibilityRule />
 
 </div>
 
@@ -324,39 +295,15 @@ class: stage-slide
 
 <div class="slide-shell">
 
-# The overall loop: discover first, then train
+# RND-based federation discovery
 
-<FlowDiagram
-  :click="$clicks"
-  :stages="[
-    { label: 'Exchange RND predictors', sub: 'tiny auxiliary models' },
-    { label: 'Score peers locally', sub: 'novelty on private data' },
-    { label: 'Build compatibility graph', sub: 'one error per pair' },
-    { label: 'Extract federations', sub: 'no preset K' },
-    { label: 'Train per federation', sub: 'standard FedAvg inside' },
-  ]"
-/>
-<div v-click="1" class="click-marker" /><div v-click="2" class="click-marker" /><div v-click="3" class="click-marker" /><div v-click="4" class="click-marker" /><div v-click="5" class="click-marker" />
-
-<div class="three-up">
-  <div class="contribution-item teal-top">
-    <h3>Discovery phase</h3>
-    <p>Runs on the <strong>small RND predictors</strong>, completely decoupled from the task model.</p>
-  </div>
-  <div class="contribution-item green-top">
-    <h3>Training phase</h3>
-    <p>Each federation trains independently with <strong>any standard FL algorithm</strong>.</p>
-  </div>
-  <div class="contribution-item orange-top">
-    <h3>Optional refresh</h3>
-    <p>In stationary settings discover <strong>once</strong>; if the deployment drifts, re-cluster every <i>τ</i> rounds.</p>
-  </div>
-</div>
+<RNDClusteringPipeline :click="$clicks" />
+<div v-click="1" class="click-marker" /><div v-click="2" class="click-marker" />
 
 </div>
 
 <!-- [Sources]
-Overall methodology loop: supplied manuscript, Methodology and Novelty Driven Clustering sections.
+Pipeline and compatibility rule: AI4AS_2026.pdf, Section IV-B and Algorithms 1–2.
 -->
 
 ---
@@ -366,27 +313,22 @@ class: code-slide
 
 <div class="slide-shell algorithm-slide">
 
-# On each device: train once, score every peer
+# Algorithm 1: device-side novelty estimation
 
-```python {1-2|4|6-8|10}
-predictor_i = train_rnd(B_i, shared_target)
+```python {1|2,4|6-8|10}
+predictor_i = train_rnd(local_data, shared_target)
 send(predictor_i)
 
 predictors = receive_all_predictors()
 
 for j, predictor_j in enumerate(predictors):
-    s_i[j] = mean_squared_error(
-        predictor_j(B_i), shared_target(B_i))
+    score[j] = mean_squared_error(
+        predictor_j(local_data), shared_target(local_data))
 
-send_novelty_row(s_i)
+send_novelty_row(score)
 ```
 
-<div class="algorithm-legend">
-  <span><b>1.</b> fit a compact local proxy on private data</span>
-  <span><b>2.</b> exchange predictors — not samples</span>
-  <span><b>3.</b> evaluate every peer on private data</span>
-  <span><b>4.</b> report one score per pair</span>
-</div>
+<AlgorithmLegend1 :click="$clicks" />
 
 </div>
 
@@ -401,9 +343,9 @@ class: code-slide
 
 <div class="slide-shell algorithm-slide">
 
-# On the server: cluster, then run standard FL
+# Algorithm 2: server-side federation discovery
 
-```python {1-3|4-7|9|10-11}
+```python {1-3|5-7|9-10}
 for round in training:
     if round == 0 or round % tau == 0:
         predictors = collect_and_distribute_predictors()
@@ -416,13 +358,7 @@ for round in training:
         run_federated_learning(federation)
 ```
 
-<div class="algorithm-legend three-legend">
-  <span><b>Discover</b> at round 0, before task training starts</span>
-  <span><b>Refresh</b> every τ rounds only if the deployment drifts</span>
-  <span><b>Train</b> independently inside each federation</span>
-</div>
-
-<div class="decoupling-callout">Clustering and task learning now run on <strong>different schedules</strong> and with <strong>different models</strong>.</div>
+<AlgorithmLegend2 :click="$clicks" />
 
 </div>
 
@@ -437,18 +373,18 @@ class: viz-slide
 
 <div class="slide-shell">
 
-# The experiment isolates clustered feature skew
+# Experimental setup: CIFAR-10 under clustered feature skew
 
 <div class="three-up contribution-row">
   <div class="contribution-item teal-top">
     <div class="contribution-number">01</div>
     <h3>Decentralized setup</h3>
-    <p><strong>CIFAR-10 benchmark</strong> with <i>N</i> = 12 total devices solving the same 10-class task on private local data.</p>
+    <p><strong>CIFAR-10 benchmark</strong> with <MathTex math="N = 12" /> devices solving the same 10-class task on private local data <MathTex math="\mathcal{B}_i" />.</p>
   </div>
   <div class="contribution-item orange-top">
     <div class="contribution-number">02</div>
     <h3>Clustered feature skew</h3>
-    <p><i>k</i> = 4 latent groups (3 devices each) with <strong>distinct Gaussian noise perturbations</strong>: IID within each group, non-IID across.</p>
+    <p><MathTex math="k = 4" /> latent groups (3 devices each): identical <MathTex math="P_i(y)" />, but distinct feature distributions <MathTex math="P_i(x|y)" /> across groups.</p>
   </div>
   <div class="contribution-item green-top">
     <div class="contribution-number">03</div>
@@ -457,7 +393,7 @@ class: viz-slide
   </div>
 </div>
 
-<p class="centered-claim">Ground truth by construction: the 4 groups are known, allowing us to evaluate whether RND <strong>rediscovers the latent structure without ever observing labels</strong>.</p>
+<p class="centered-claim">Ground truth by construction (<MathTex math="k=4" /> groups known): allows verifying whether RND <strong>recovers the latent partition without ever observing labels</strong>.</p>
 
 <Cites refs="6,7,8" />
 
@@ -476,7 +412,7 @@ class: viz-slide
 
 <div class="slide-shell result-slide">
 
-# RND exposes the four latent groups before task training
+# Novelty matrix recovers the latent group structure
 
 <div class="result-pair">
   <div class="paper-figure-shell result-figure">
@@ -502,7 +438,7 @@ class: viz-slide
 
 <div class="slide-shell result-slide">
 
-# RND clustering is about 10× cheaper than IFCA
+# Clustering overhead: RND vs. IFCA
 
 <div class="split-grid timing-grid">
   <div class="paper-figure-shell timing-figure">
@@ -531,7 +467,7 @@ transition: fade
 
 <div class="slide-shell conclusion-slide">
 
-# Collaboration structure becomes an independent system primitive
+# Conclusions and future work
 
 <div class="three-up conclusion-row">
   <div class="conclusion-item teal-top">
@@ -543,25 +479,25 @@ transition: fade
     <p>Small predictors and a separate schedule cut clustering overhead by about an order of magnitude.</p>
   </div>
   <div class="conclusion-item orange-top">
-    <h3>No fixed <i>K</i></h3>
-    <p>Federations emerge from observed compatibility instead of a predefined cluster count.</p>
+    <h3>Private by design</h3>
+    <p>Raw observations stay local; collaboration relies on compact auxiliary predictors and novelty scores.</p>
   </div>
 </div>
 
 <div class="future-grid">
   <div>
     <span class="eyebrow">Current boundary</span>
-    <p>Preliminary evidence on 12 CIFAR-10 clients with synthetic feature skew; centralized all-to-all evaluation scales quadratically with the number of clients.</p>
+    <p>Preliminary evidence on 12 CIFAR-10 clients with synthetic feature skew; centralized all-to-all evaluation scales quadratically with the number of clients (<MathTex math="\mathcal{O}(N^2)" />).</p>
   </div>
   <div>
     <span class="eyebrow">Next</span>
-    <p>Larger and real-world sensing deployments, neighborhood-only exchange, adaptive ε, and robustness to Byzantine, Sybil, and masquerade attacks.</p>
+    <p>Larger and real-world sensing deployments, neighborhood-only exchange, adaptive <MathTex math="\epsilon" />, and robustness to Byzantine, Sybil, and masquerade attacks.</p>
   </div>
 </div>
 
-<div class="closing-question">When distributions drift, how should the system adapt <strong>ε</strong> and <strong>τ</strong>?</div>
-
-<p class="code-link">Code: github.com/domm99/experiments-2026-uncertainty-based-clustered-fl</p>
+<div style="display: flex; justify-content: center; margin-top: 0.2rem;">
+  <QrCard title="Code & Experiments" url="https://github.com/domm99/experiments-2026-uncertainty-based-clustered-fl" :size="3.2" />
+</div>
 
 </div>
 

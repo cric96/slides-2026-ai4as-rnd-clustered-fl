@@ -103,9 +103,9 @@ export const trafficSites: TrafficSite[] = [
     cluster: 'a',
     vehicles: [
       { direction: 'north', duration: 10.0, delay: 0, track: 0, tone: 'plum', kind: 'car' },
-      { direction: 'north', duration: 10.0, delay: -0.35, track: 0, tone: 'teal', kind: 'van' },
+      { direction: 'north', duration: 10.0, delay: -0.8, track: 0, tone: 'teal', kind: 'van' },
       { direction: 'south', duration: 10.0, delay: 0, track: 0, tone: 'orange', kind: 'car' },
-      { direction: 'south', duration: 10.0, delay: -0.35, track: 0, tone: 'green', kind: 'car' },
+      { direction: 'south', duration: 10.0, delay: -0.8, track: 0, tone: 'green', kind: 'car' },
       { direction: 'east', duration: 10.0, delay: 0, track: 0, tone: 'plum', kind: 'car' },
       { direction: 'west', duration: 10.0, delay: 0, track: 0, tone: 'teal', kind: 'car' },
     ],

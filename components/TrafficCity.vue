@@ -8,8 +8,6 @@ const props = defineProps<{
 }>()
 
 const currentStep = computed(() => Math.max(0, props.step ?? 0))
-const updateMarkerId = computed(() => `arrow-update-${props.mode}`)
-const sharedMarkerId = computed(() => `arrow-shared-${props.mode}`)
 const accessibleLabel = computed(() => {
   if (props.mode === 'reference') {
     if (currentStep.value === 0) return 'One traffic junction with a roadside camera forecasting local traffic.'
@@ -48,6 +46,19 @@ function isSiteHidden(site: (typeof trafficSites)[number]) {
   }
   return false
 }
+
+// Draw arrowheads in the same SVG coordinate system as the routes. SVG
+// markers are scaled inconsistently by some Slidev/PDF renderers, especially
+// when the map is stretched with preserveAspectRatio="none".
+function arrowHeadPath(x1: number, y1: number, x2: number, y2: number, size = 3.8) {
+  const angle = Math.atan2(y2 - y1, x2 - x1)
+  const baseX = x2 - Math.cos(angle) * size
+  const baseY = y2 - Math.sin(angle) * size
+  const wing = size * 0.58
+  const perpX = -Math.sin(angle) * wing
+  const perpY = Math.cos(angle) * wing
+  return `M ${x2} ${y2} L ${baseX + perpX} ${baseY + perpY} L ${baseX - perpX} ${baseY - perpY} Z`
+}
 </script>
 
 <template>
@@ -70,31 +81,18 @@ function isSiteHidden(site: (typeof trafficSites)[number]) {
     />
 
     <svg v-if="mode !== 'reference'" class="model-routes" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-      <defs>
-        <marker :id="updateMarkerId" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse">
-          <path class="marker-update" d="M 0 0 L 10 5 L 0 10 z" />
-        </marker>
-        <marker :id="sharedMarkerId" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse">
-          <path class="marker-shared" d="M 0 0 L 10 5 L 0 10 z" />
-        </marker>
-      </defs>
-
       <g class="federated-uplinks">
-        <line
-          v-for="site in trafficSites"
-          :key="`up-${site.id}`"
-          :x1="site.x" :y1="site.y" x2="50" y2="50"
-          :marker-end="`url(#${updateMarkerId})`"
-        />
+        <template v-for="site in trafficSites" :key="`up-${site.id}`">
+          <line :x1="site.x" :y1="site.y" x2="50" y2="50" />
+          <path class="marker-update" :d="arrowHeadPath(site.x, site.y, 50, 50)" />
+        </template>
       </g>
 
       <g class="shared-downlinks">
-        <line
-          v-for="site in trafficSites"
-          :key="`down-${site.id}`"
-          x1="50" y1="50" :x2="site.x" :y2="site.y"
-          :marker-end="`url(#${sharedMarkerId})`"
-        />
+        <template v-for="site in trafficSites" :key="`down-${site.id}`">
+          <line x1="50" y1="50" :x2="site.x" :y2="site.y" />
+          <path class="marker-shared" :d="arrowHeadPath(50, 50, site.x, site.y)" />
+        </template>
       </g>
 
       <g class="global-links">
@@ -211,7 +209,6 @@ function isSiteHidden(site: (typeof trafficSites)[number]) {
       <div class="map-status status-local">six local models</div>
       <div class="map-status status-merge">updates meet here</div>
       <div class="map-status status-shared">one model reaches all six junctions</div>
-      <div class="map-status status-global">one average, six different traffic regimes</div>
       <div class="map-status status-groups">similar traffic — not nearby streets — defines each group</div>
       <div class="map-status status-specialized">three merged models, each reused at compatible junctions</div>
     </template>
@@ -312,6 +309,7 @@ function isSiteHidden(site: (typeof trafficSites)[number]) {
 
 .federated-uplinks line {
   stroke: var(--map-update);
+  stroke-width: 2.2;
   stroke-dasharray: 4 5;
 }
 
@@ -860,7 +858,6 @@ function isSiteHidden(site: (typeof trafficSites)[number]) {
 .mode-federated[data-step="1"] .status-local,
 .mode-federated[data-step="2"] .status-merge,
 .mode-federated[data-step="3"] .status-shared,
-.mode-clustered[data-step="0"] .status-global,
 .mode-clustered[data-step="1"] .status-groups,
 .mode-clustered[data-step="2"] .status-specialized {
   transform: translateY(-50%);
@@ -868,7 +865,6 @@ function isSiteHidden(site: (typeof trafficSites)[number]) {
 
 .mode-clustered[data-step="0"] .global-links,
 .mode-clustered[data-step="0"] .global-model,
-.mode-clustered[data-step="0"] .status-global,
 .mode-clustered[data-step="1"] .cluster-card,
 .mode-clustered[data-step="1"] .group-badge,
 .mode-clustered[data-step="1"] .status-groups,
@@ -919,24 +915,24 @@ function isSiteHidden(site: (typeof trafficSites)[number]) {
 @keyframes centre-horizontal-front {
   0% { transform: translate3d(0, 0, 0); opacity: 0; }
   2% { opacity: 1; }
-  12%, 18% { transform: translate3d(calc(var(--flow-x-end) * .24), 0, 0); }
-  27%, 33% { transform: translate3d(calc(var(--flow-x-end) * .5), 0, 0); }
+  12%, 18% { transform: translate3d(var(--centre-stop-1), 0, 0); }
+  27%, 33% { transform: translate3d(var(--centre-stop-2), 0, 0); }
   44% { transform: translate3d(var(--flow-x-end), 0, 0); opacity: 1; }
   46%, 100% { transform: translate3d(var(--flow-x-end), 0, 0); opacity: 0; }
 }
 @keyframes centre-horizontal-back {
   0%, 4% { transform: translate3d(0, 0, 0); opacity: 0; }
   6% { opacity: 1; }
-  16%, 22% { transform: translate3d(calc(var(--flow-x-end) * .17), 0, 0); }
-  31%, 37% { transform: translate3d(calc(var(--flow-x-end) * .42), 0, 0); }
+  16%, 22% { transform: translate3d(var(--centre-back-stop-1), 0, 0); }
+  31%, 37% { transform: translate3d(var(--centre-back-stop-2), 0, 0); }
   48% { transform: translate3d(var(--flow-x-end), 0, 0); opacity: 1; }
   50%, 100% { transform: translate3d(var(--flow-x-end), 0, 0); opacity: 0; }
 }
 @keyframes centre-vertical {
   0%, 54% { transform: translate3d(0, 0, 0); opacity: 0; }
   56% { opacity: 1; }
-  65%, 70% { transform: translate3d(0, calc(var(--flow-y-end) * .25), 0); }
-  79%, 84% { transform: translate3d(0, calc(var(--flow-y-end) * .54), 0); }
+  65%, 70% { transform: translate3d(0, var(--centre-y-stop-1), 0); }
+  79%, 84% { transform: translate3d(0, var(--centre-y-stop-2), 0); }
   98% { transform: translate3d(0, var(--flow-y-end), 0); opacity: 1; }
   100% { transform: translate3d(0, var(--flow-y-end), 0); opacity: 0; }
 }
@@ -945,14 +941,14 @@ function isSiteHidden(site: (typeof trafficSites)[number]) {
 @keyframes school-horizontal-front {
   0% { transform: translate3d(0, 0, 0); opacity: 0; }
   2% { opacity: 1; }
-  18%, 42% { transform: translate3d(calc(var(--flow-x-end) * .36), 0, 0); }
+  18%, 42% { transform: translate3d(var(--school-front-stop), 0, 0); }
   52% { transform: translate3d(var(--flow-x-end), 0, 0); opacity: 1; }
   54%, 100% { transform: translate3d(var(--flow-x-end), 0, 0); opacity: 0; }
 }
 @keyframes school-horizontal-back {
   0%, 4% { transform: translate3d(0, 0, 0); opacity: 0; }
   6% { opacity: 1; }
-  22%, 46% { transform: translate3d(calc(var(--flow-x-end) * .285), 0, 0); }
+  22%, 46% { transform: translate3d(var(--school-back-stop), 0, 0); }
   58% { transform: translate3d(var(--flow-x-end), 0, 0); opacity: 1; }
   60%, 100% { transform: translate3d(var(--flow-x-end), 0, 0); opacity: 0; }
 }
