@@ -3,24 +3,50 @@ import { computed } from 'vue'
 import { clusterModels, clusterPairs, trafficSites } from './trafficCityConfig'
 
 const props = defineProps<{
-  mode: 'federated' | 'clustered'
+  mode: 'reference' | 'federated' | 'clustered'
   step?: number
 }>()
 
 const currentStep = computed(() => Math.max(0, props.step ?? 0))
 const updateMarkerId = computed(() => `arrow-update-${props.mode}`)
 const sharedMarkerId = computed(() => `arrow-shared-${props.mode}`)
-const accessibleLabel = computed(() => props.mode === 'federated'
-  ? 'Six traffic junctions with different flows train locally, merge model updates, and receive one shared model.'
-  : 'The same six traffic junctions are grouped by compatible traffic patterns and receive one specialized model per group.')
+const accessibleLabel = computed(() => {
+  if (props.mode === 'reference') {
+    if (currentStep.value === 0) return 'One traffic junction with a roadside camera forecasting local traffic.'
+    if (currentStep.value === 1) return 'Two contrasting traffic junctions: dense rush hour versus fast sparse ring road flow.'
+    return 'Six heterogeneous traffic junctions across the city with distinct traffic patterns.'
+  }
+  return props.mode === 'federated'
+    ? 'Six traffic junctions with different flows train locally, merge model updates, and receive one shared model.'
+    : 'The same six traffic junctions are grouped by compatible traffic patterns and receive one specialized model per group.'
+})
 
 function getSitePos(site: (typeof trafficSites)[number]) {
+  if (props.mode === 'reference') {
+    if (currentStep.value === 0) {
+      if (site.id === 'centre') return { x: 50, y: 50 }
+    }
+    return { x: site.x, y: site.y }
+  }
   if (props.mode === 'clustered' && currentStep.value >= 1) {
     if (site.id === 'stadium') return { x: 17, y: 78 }
     if (site.id === 'residential') return { x: 50, y: 78 }
     if (site.id === 'arterial') return { x: 83, y: 78 }
   }
   return { x: site.x, y: site.y }
+}
+
+function isSiteHidden(site: (typeof trafficSites)[number]) {
+  if (props.mode === 'reference') {
+    if (currentStep.value === 0) {
+      return site.id !== 'centre'
+    }
+    if (currentStep.value === 1) {
+      return site.id !== 'centre' && site.id !== 'ring'
+    }
+    return false
+  }
+  return false
 }
 </script>
 
@@ -35,6 +61,7 @@ function getSitePos(site: (typeof trafficSites)[number]) {
     <div class="map-texture" aria-hidden="true" />
 
     <div
+      v-if="mode === 'clustered'"
       v-for="cKey in (['a', 'b', 'c'] as const)"
       :key="`card-${cKey}`"
       class="cluster-card"
@@ -42,7 +69,7 @@ function getSitePos(site: (typeof trafficSites)[number]) {
       aria-hidden="true"
     />
 
-    <svg class="model-routes" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+    <svg v-if="mode !== 'reference'" class="model-routes" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
       <defs>
         <marker :id="updateMarkerId" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse">
           <path class="marker-update" d="M 0 0 L 10 5 L 0 10 z" />
@@ -105,7 +132,14 @@ function getSitePos(site: (typeof trafficSites)[number]) {
       v-for="site in trafficSites"
       :key="site.id"
       class="traffic-site"
-      :class="[`cluster-${site.cluster}`, `flow-${site.id}`]"
+      :class="[
+        `cluster-${site.cluster}`,
+        `flow-${site.id}`,
+        {
+          'site-hero': mode === 'reference' && currentStep === 0 && site.id === 'centre',
+          'is-hidden': isSiteHidden(site),
+        }
+      ]"
       :style="{ left: `${getSitePos(site).x}%`, top: `${getSitePos(site).y}%` }"
       :aria-label="`${site.camera}, ${site.name}: ${site.flow}`"
     >
@@ -134,44 +168,53 @@ function getSitePos(site: (typeof trafficSites)[number]) {
       <div class="camera-icon" aria-hidden="true">
         <span class="camera-body"><i /></span>
         <span class="camera-pole" />
+        <span v-if="mode === 'reference' && currentStep === 0 && site.id === 'centre'" class="camera-cone" />
       </div>
 
-      <div class="site-model" :class="`cluster-${site.cluster}`">
+      <div v-if="mode !== 'reference'" class="site-model" :class="`cluster-${site.cluster}`">
         <template v-if="mode === 'clustered' && currentStep >= 2">ω{{ site.cluster.toUpperCase() }}</template>
         <template v-else-if="mode === 'federated' && currentStep >= 3">ωG</template>
         <template v-else>θ{{ site.camera.slice(-2) }}</template>
       </div>
 
-      <div class="group-badge" :class="`cluster-${site.cluster}`">GROUP {{ site.cluster.toUpperCase() }}</div>
+      <div v-if="mode !== 'reference'" class="group-badge" :class="`cluster-${site.cluster}`">GROUP {{ site.cluster.toUpperCase() }}</div>
     </section>
 
-    <div class="privacy-note"><span aria-hidden="true">■</span> raw video stays at each camera</div>
-
-    <div class="global-model">
-      <strong v-if="mode === 'federated' && currentStep === 2">MERGE</strong>
-      <strong v-else>ωG</strong>
-      <small v-if="mode === 'federated' && currentStep === 2">model updates</small>
-      <small v-else-if="mode === 'federated'">shared model</small>
-      <small v-else>one global model</small>
+    <div v-if="mode === 'reference' && currentStep === 0" class="hero-forecast-badge">
+      <span class="pulse-dot" />
+      <strong>TASK: TRAFFIC FORECASTING</strong>
     </div>
 
-    <div
-      v-for="model in clusterModels"
-      :key="model.cluster"
-      class="cluster-model"
-      :class="`cluster-${model.cluster}`"
-      :style="{ left: `${model.x}%`, top: `${model.y}%` }"
-    >
-      <strong>{{ model.label }}</strong>
-      <small>group {{ model.cluster.toUpperCase() }}</small>
-    </div>
+    <template v-if="mode !== 'reference'">
+      <div class="privacy-note"><span aria-hidden="true">■</span> raw video stays at each camera</div>
 
-    <div class="map-status status-local">six local models</div>
-    <div class="map-status status-merge">updates meet here</div>
-    <div class="map-status status-shared">one model reaches all six junctions</div>
-    <div class="map-status status-global">one average, six different traffic regimes</div>
-    <div class="map-status status-groups">similar traffic — not nearby streets — defines each group</div>
-    <div class="map-status status-specialized">three merged models, each reused at compatible junctions</div>
+      <div class="global-model">
+        <strong v-if="mode === 'federated' && currentStep === 2">MERGE</strong>
+        <strong v-else>ωG</strong>
+        <small v-if="mode === 'federated' && currentStep === 2">model updates</small>
+        <small v-else-if="mode === 'federated'">shared model</small>
+        <small v-else>one global model</small>
+      </div>
+
+      <div
+        v-if="mode === 'clustered'"
+        v-for="model in clusterModels"
+        :key="model.cluster"
+        class="cluster-model"
+        :class="`cluster-${model.cluster}`"
+        :style="{ left: `${model.x}%`, top: `${model.y}%` }"
+      >
+        <strong>{{ model.label }}</strong>
+        <small>group {{ model.cluster.toUpperCase() }}</small>
+      </div>
+
+      <div class="map-status status-local">six local models</div>
+      <div class="map-status status-merge">updates meet here</div>
+      <div class="map-status status-shared">one model reaches all six junctions</div>
+      <div class="map-status status-global">one average, six different traffic regimes</div>
+      <div class="map-status status-groups">similar traffic — not nearby streets — defines each group</div>
+      <div class="map-status status-specialized">three merged models, each reused at compatible junctions</div>
+    </template>
   </div>
 </template>
 
@@ -207,7 +250,7 @@ function getSitePos(site: (typeof trafficSites)[number]) {
 .map-texture {
   position: absolute;
   inset: 0;
-  z-index: 0;
+  z-index: 1;
   opacity: 0.55;
   background:
     linear-gradient(90deg, transparent 49.7%, color-mix(in oklch, var(--deck-line) 42%, transparent) 49.7% 50.3%, transparent 50.3%),
@@ -301,7 +344,7 @@ function getSitePos(site: (typeof trafficSites)[number]) {
   position: absolute;
   width: 29.5%;
   height: 38%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%) scale(1);
   overflow: hidden;
   z-index: 1;
   background:
@@ -309,11 +352,29 @@ function getSitePos(site: (typeof trafficSites)[number]) {
     var(--map-land);
   outline: 0 solid transparent;
   outline-offset: -2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid transparent;
   transition:
     left 0.85s cubic-bezier(0.22, 1, 0.36, 1),
     top 0.85s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.85s cubic-bezier(0.22, 1, 0.36, 1),
     opacity var(--deck-dur-long) var(--deck-ease-out),
-    outline-color var(--deck-dur-long) var(--deck-ease-out);
+    outline-color var(--deck-dur-long) var(--deck-ease-out),
+    box-shadow var(--deck-dur-long) var(--deck-ease-out),
+    border-color var(--deck-dur-long) var(--deck-ease-out);
+}
+
+.traffic-site.is-hidden {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translate(-50%, -50%) scale(0.72) !important;
+}
+
+.traffic-site.site-hero {
+  transform: translate(-50%, -50%) scale(1.42) !important;
+  z-index: 10;
+  box-shadow: 0 12px 32px rgba(15, 76, 92, 0.22);
+  border-color: var(--deck-teal);
 }
 
 .road {
@@ -332,7 +393,7 @@ function getSitePos(site: (typeof trafficSites)[number]) {
 }
 
 .road-vertical {
-  top: 26%;
+  top: -5%;
   bottom: -5%;
   left: 54%;
   width: 2.45rem;
@@ -405,6 +466,40 @@ function getSitePos(site: (typeof trafficSites)[number]) {
   font-size: 0.47rem !important;
 }
 
+.hero-forecast-badge {
+  position: absolute;
+  top: 0.72rem;
+  right: 0.9rem;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.28rem 0.58rem;
+  background: color-mix(in oklch, var(--deck-teal) 11%, var(--map-land));
+  border: 1px solid var(--deck-teal);
+  border-radius: 5px;
+  font-family: var(--deck-font-mono);
+  color: var(--deck-teal);
+  font-size: 0.55rem !important;
+  letter-spacing: 0.04em;
+  box-shadow: 0 2px 8px rgba(15, 76, 92, 0.14);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.pulse-dot {
+  width: 0.34rem;
+  height: 0.34rem;
+  border-radius: 50%;
+  background: var(--deck-orange);
+  animation: ping-pulse 1.6s infinite ease-in-out;
+}
+
+@keyframes ping-pulse {
+  0%, 100% { transform: scale(0.85); opacity: 0.7; }
+  50% { transform: scale(1.35); opacity: 1; }
+}
+
 .vehicle {
   --vehicle-track: 0rem;
   position: absolute;
@@ -417,7 +512,7 @@ function getSitePos(site: (typeof trafficSites)[number]) {
   border-radius: 0.1rem;
   animation-duration: var(--vehicle-duration);
   animation-delay: var(--vehicle-delay);
-  animation-timing-function: var(--deck-ease-in-out);
+  animation-timing-function: linear;
   animation-iteration-count: infinite;
 }
 
@@ -435,14 +530,14 @@ function getSitePos(site: (typeof trafficSites)[number]) {
 .vehicle.tone-plum { color: var(--deck-car-plum); }
 
 .vehicle.east {
-  left: -1.1rem;
-  top: calc(57% - 0.78rem + var(--vehicle-track));
+  left: -1.2rem;
+  top: calc(57% - 0.76rem);
   animation-name: drive-east;
 }
 
 .vehicle.west {
-  right: -1.1rem;
-  top: calc(57% + 0.38rem + var(--vehicle-track));
+  right: -1.2rem;
+  top: calc(57% + 0.38rem);
   animation-name: drive-west;
 }
 
@@ -456,15 +551,102 @@ function getSitePos(site: (typeof trafficSites)[number]) {
 .vehicle.south.kind-van { height: 0.92rem; }
 
 .vehicle.north {
-  bottom: -1.1rem;
-  left: calc(54% - 0.77rem + var(--vehicle-track));
+  bottom: -1.2rem;
+  left: calc(54% - 0.76rem);
   animation-name: drive-north;
 }
 
 .vehicle.south {
-  top: 24%;
-  left: calc(54% + 0.38rem + var(--vehicle-track));
+  top: -1.2rem;
+  left: calc(54% + 0.38rem);
   animation-name: drive-south;
+}
+
+/* Collision-free schedules: conflicting directions never enter together. */
+.flow-centre .vehicle.east,
+.flow-school .vehicle.east,
+.flow-residential .vehicle.east,
+.flow-stadium .vehicle.east {
+  --flow-x-end: 20rem;
+  --centre-stop-1: 4.8rem;
+  --centre-stop-2: 10rem;
+  --centre-back-stop-1: 3.4rem;
+  --centre-back-stop-2: 8.4rem;
+  --school-front-stop: 7.2rem;
+  --school-back-stop: 5.7rem;
+}
+
+.flow-centre .vehicle.west,
+.flow-school .vehicle.west,
+.flow-residential .vehicle.west,
+.flow-stadium .vehicle.west {
+  --flow-x-end: -20rem;
+  --centre-stop-1: -4.8rem;
+  --centre-stop-2: -10rem;
+  --centre-back-stop-1: -3.4rem;
+  --centre-back-stop-2: -8.4rem;
+  --school-front-stop: -7.2rem;
+  --school-back-stop: -5.7rem;
+}
+
+.flow-centre .vehicle.north,
+.flow-residential .vehicle.north,
+.flow-stadium .vehicle.north {
+  --flow-y-end: -9.5rem;
+  --centre-y-stop-1: -2.35rem;
+  --centre-y-stop-2: -5.1rem;
+}
+
+.flow-centre .vehicle.south,
+.flow-school .vehicle.south,
+.flow-residential .vehicle.south,
+.flow-stadium .vehicle.south {
+  --flow-y-end: 9.5rem;
+  --centre-y-stop-1: 2.35rem;
+  --centre-y-stop-2: 5.1rem;
+}
+
+.flow-centre .vehicle:nth-of-type(1),
+.flow-centre .vehicle:nth-of-type(3) { animation-name: centre-horizontal-front; }
+.flow-centre .vehicle:nth-of-type(2),
+.flow-centre .vehicle:nth-of-type(4) { animation-name: centre-horizontal-back; }
+.flow-centre .vehicle:nth-of-type(5),
+.flow-centre .vehicle:nth-of-type(6) { animation-name: centre-vertical; }
+
+.flow-school .vehicle:nth-of-type(1),
+.flow-school .vehicle:nth-of-type(3) { animation-name: school-horizontal-front; }
+.flow-school .vehicle:nth-of-type(2),
+.flow-school .vehicle:nth-of-type(4) { animation-name: school-horizontal-back; }
+.flow-school .vehicle:nth-of-type(5) { animation-name: school-vertical; }
+
+.flow-residential .vehicle.east,
+.flow-residential .vehicle.west { animation-name: signal-horizontal; }
+.flow-residential .vehicle.north,
+.flow-residential .vehicle.south { animation-name: signal-vertical; }
+
+.flow-stadium .vehicle.north,
+.flow-stadium .vehicle.south { animation-name: surge-vertical; }
+.flow-stadium .vehicle.east,
+.flow-stadium .vehicle.west { animation-name: surge-horizontal; }
+
+.camera-cone {
+  position: absolute;
+  left: 0.21rem;
+  top: 0.035rem;
+  z-index: 0;
+  width: 2.8rem;
+  height: 1.35rem;
+  background: linear-gradient(90deg, color-mix(in oklch, var(--deck-teal) 38%, transparent), color-mix(in oklch, var(--deck-teal) 12%, transparent));
+  clip-path: polygon(0 50%, 100% 0, 100% 100%);
+  transform: rotate(127deg);
+  transform-origin: 0 50%;
+  pointer-events: none;
+  animation: radar-pulse 3s infinite ease-in-out;
+}
+
+@keyframes radar-pulse {
+  0%, 100% { opacity: 0.58; }
+  50% { opacity: 0.9; }
 }
 
 .camera-icon {
@@ -479,13 +661,15 @@ function getSitePos(site: (typeof trafficSites)[number]) {
 
 .camera-body {
   position: absolute;
+  z-index: 3;
   top: 0;
   left: 0;
   width: 1.05rem;
   height: 0.58rem;
   border: 2px solid currentColor;
   background: var(--map-land);
-  transform: rotate(-5deg);
+  transform: rotate(127deg);
+  transform-origin: center;
 }
 
 .camera-body::after {
@@ -509,6 +693,7 @@ function getSitePos(site: (typeof trafficSites)[number]) {
 
 .camera-pole {
   position: absolute;
+  z-index: 2;
   left: 0.5rem;
   top: 0.62rem;
   width: 2px;
@@ -713,10 +898,98 @@ function getSitePos(site: (typeof trafficSites)[number]) {
 .mode-clustered[data-step="1"] .traffic-site.cluster-c,
 .mode-clustered[data-step="2"] .traffic-site.cluster-c { outline: 3px double var(--cluster-c); }
 
-@keyframes drive-east { to { transform: translate3d(2500%, 0, 0); } }
-@keyframes drive-west { to { transform: translate3d(-2500%, 0, 0); } }
-@keyframes drive-north { to { transform: translate3d(0, -720%, 0); } }
-@keyframes drive-south { to { transform: translate3d(0, 720%, 0); } }
+@keyframes drive-east {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(20rem, 0, 0); }
+}
+@keyframes drive-west {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-20rem, 0, 0); }
+}
+@keyframes drive-north {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(0, -9.5rem, 0); }
+}
+@keyframes drive-south {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(0, 9.5rem, 0); }
+}
+
+/* Dense centre: two staggered queues clear before cross traffic enters. */
+@keyframes centre-horizontal-front {
+  0% { transform: translate3d(0, 0, 0); opacity: 0; }
+  2% { opacity: 1; }
+  12%, 18% { transform: translate3d(calc(var(--flow-x-end) * .24), 0, 0); }
+  27%, 33% { transform: translate3d(calc(var(--flow-x-end) * .5), 0, 0); }
+  44% { transform: translate3d(var(--flow-x-end), 0, 0); opacity: 1; }
+  46%, 100% { transform: translate3d(var(--flow-x-end), 0, 0); opacity: 0; }
+}
+@keyframes centre-horizontal-back {
+  0%, 4% { transform: translate3d(0, 0, 0); opacity: 0; }
+  6% { opacity: 1; }
+  16%, 22% { transform: translate3d(calc(var(--flow-x-end) * .17), 0, 0); }
+  31%, 37% { transform: translate3d(calc(var(--flow-x-end) * .42), 0, 0); }
+  48% { transform: translate3d(var(--flow-x-end), 0, 0); opacity: 1; }
+  50%, 100% { transform: translate3d(var(--flow-x-end), 0, 0); opacity: 0; }
+}
+@keyframes centre-vertical {
+  0%, 54% { transform: translate3d(0, 0, 0); opacity: 0; }
+  56% { opacity: 1; }
+  65%, 70% { transform: translate3d(0, calc(var(--flow-y-end) * .25), 0); }
+  79%, 84% { transform: translate3d(0, calc(var(--flow-y-end) * .54), 0); }
+  98% { transform: translate3d(0, var(--flow-y-end), 0); opacity: 1; }
+  100% { transform: translate3d(0, var(--flow-y-end), 0); opacity: 0; }
+}
+
+/* School gate: a real two-car queue stops, then departs in order. */
+@keyframes school-horizontal-front {
+  0% { transform: translate3d(0, 0, 0); opacity: 0; }
+  2% { opacity: 1; }
+  18%, 42% { transform: translate3d(calc(var(--flow-x-end) * .36), 0, 0); }
+  52% { transform: translate3d(var(--flow-x-end), 0, 0); opacity: 1; }
+  54%, 100% { transform: translate3d(var(--flow-x-end), 0, 0); opacity: 0; }
+}
+@keyframes school-horizontal-back {
+  0%, 4% { transform: translate3d(0, 0, 0); opacity: 0; }
+  6% { opacity: 1; }
+  22%, 46% { transform: translate3d(calc(var(--flow-x-end) * .285), 0, 0); }
+  58% { transform: translate3d(var(--flow-x-end), 0, 0); opacity: 1; }
+  60%, 100% { transform: translate3d(var(--flow-x-end), 0, 0); opacity: 0; }
+}
+@keyframes school-vertical {
+  0%, 67% { transform: translate3d(0, 0, 0); opacity: 0; }
+  69% { opacity: 1; }
+  96% { transform: translate3d(0, var(--flow-y-end), 0); opacity: 1; }
+  98%, 100% { transform: translate3d(0, var(--flow-y-end), 0); opacity: 0; }
+}
+
+/* Steady local flow obeys alternating horizontal/vertical right of way. */
+@keyframes signal-horizontal {
+  0% { transform: translate3d(0, 0, 0); opacity: 0; }
+  2% { opacity: 1; }
+  38% { transform: translate3d(var(--flow-x-end), 0, 0); opacity: 1; }
+  40%, 100% { transform: translate3d(var(--flow-x-end), 0, 0); opacity: 0; }
+}
+@keyframes signal-vertical {
+  0%, 54% { transform: translate3d(0, 0, 0); opacity: 0; }
+  56% { opacity: 1; }
+  94% { transform: translate3d(0, var(--flow-y-end), 0); opacity: 1; }
+  96%, 100% { transform: translate3d(0, var(--flow-y-end), 0); opacity: 0; }
+}
+
+/* Stadium: vertical event traffic clears before the transverse wave starts. */
+@keyframes surge-vertical {
+  0% { transform: translate3d(0, 0, 0); opacity: 0; }
+  2% { opacity: 1; }
+  38% { transform: translate3d(0, var(--flow-y-end), 0); opacity: 1; }
+  40%, 100% { transform: translate3d(0, var(--flow-y-end), 0); opacity: 0; }
+}
+@keyframes surge-horizontal {
+  0%, 51% { transform: translate3d(0, 0, 0); opacity: 0; }
+  53% { opacity: 1; }
+  88% { transform: translate3d(var(--flow-x-end), 0, 0); opacity: 1; }
+  90%, 100% { transform: translate3d(var(--flow-x-end), 0, 0); opacity: 0; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .vehicle { animation: none; }

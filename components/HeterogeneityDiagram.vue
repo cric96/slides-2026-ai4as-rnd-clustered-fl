@@ -25,12 +25,6 @@ const currentStep = computed(() => Math.min(Math.max(0, props.click ?? 0), 3))
       <!-- Overlay backdrop for dimming during spotlights -->
       <div class="het-dimmer" aria-hidden="true" />
 
-      <!-- Step 0: Initial overview tag -->
-      <div class="het-pill pill-overview" :class="{ 'is-active': currentStep === 0 }">
-        <span class="pill-dot" />
-        <span>4 latent regions · Non-IID deployment</span>
-      </div>
-
       <!-- Step 1: IID within cluster highlight -->
       <div class="spotlight-box spot-iid" :class="{ 'is-active': currentStep === 1 }">
         <span class="spot-label">IID</span>
@@ -141,41 +135,6 @@ const currentStep = computed(() => Math.min(Math.max(0, props.click ?? 0), 3))
 .het-wrapper[data-step="1"] .het-dimmer,
 .het-wrapper[data-step="2"] .het-dimmer {
   opacity: 1;
-}
-
-/* Overview pill (Step 0) */
-.pill-overview {
-  position: absolute;
-  top: 0.45rem;
-  left: 50%;
-  transform: translateX(-50%) translateY(-4px);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.2rem 0.55rem;
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid var(--deck-line);
-  border-radius: 20px;
-  box-shadow: 0 2px 6px rgba(16, 32, 43, 0.08);
-  font-family: var(--deck-font-mono);
-  font-size: 0.52rem !important;
-  color: var(--deck-ink);
-  white-space: nowrap;
-  opacity: 0;
-  transition: opacity var(--deck-dur-long) var(--deck-ease-out), transform var(--deck-dur-long) var(--deck-ease-out);
-  pointer-events: none;
-}
-
-.pill-overview.is-active {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
-.pill-dot {
-  width: 0.38rem;
-  height: 0.38rem;
-  border-radius: 50%;
-  background: var(--deck-teal);
 }
 
 /* Spotlight boxes */

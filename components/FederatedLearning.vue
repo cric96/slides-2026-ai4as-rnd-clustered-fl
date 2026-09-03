@@ -27,23 +27,28 @@ const server = { x: 50, y: 47 }
       <span
         v-for="(c, i) in clients"
         :key="`out-${i}`"
-        v-show="phase === 1"
+        v-show="phase === 1 || phase === 4"
         class="packet out"
-        :style="{ '--cx': `${c.x}%`, '--cy': `${c.y}%`, animationDelay: `${i * 0.22}s` }"
-      />
+        :class="{ repeat: phase === 4 }"
+        :style="{
+          '--cx': `${c.x}%`,
+          '--cy': `${c.y}%`,
+          animationDelay: `${(phase === 4 ? 0.75 : 0) + i * 0.16}s`,
+        }"
+      >ωG</span>
       <span
         v-for="(c, i) in clients"
         :key="`in-${i}`"
         v-show="phase === 3"
         class="packet inn"
-        :style="{ '--cx': `${c.x}%`, '--cy': `${c.y}%`, animationDelay: `${i * 0.22}s` }"
-      />
+        :style="{ '--cx': `${c.x}%`, '--cy': `${c.y}%`, animationDelay: `${i * 0.16}s` }"
+      >Δ{{ i + 1 }}</span>
 
       <div
         v-for="(c, i) in clients"
         :key="`client-${i}`"
         class="fl-client"
-        :style="{ left: `${c.x}%`, top: `${c.y}%` }"
+        :style="{ left: `${c.x}%`, top: `${c.y}%`, '--receive-delay': `${2.3 + i * 0.16}s` }"
       >
         <span class="client-dot">d{{ i + 1 }}</span>
         <span class="client-sub">private data</span>
@@ -52,8 +57,8 @@ const server = { x: 50, y: 47 }
 
       <div class="fl-server" :style="{ left: `${server.x}%`, top: `${server.y}%` }">
         <span class="server-box">SERVER</span>
-        <span class="server-sub">only sees model updates</span>
-        <span class="agg-badge">FedAvg · averaging</span>
+        <span class="server-sub">{{ phase === 4 ? 'new global model ready' : 'only sees model updates' }}</span>
+        <span class="agg-badge">FedAvg → new ωG</span>
       </div>
     </div>
 
@@ -63,7 +68,7 @@ const server = { x: 50, y: 47 }
         <span v-if="n === 1"><strong>Broadcast</strong><small>server sends the global model to every camera</small></span>
         <span v-else-if="n === 2"><strong>Train locally</strong><small>a few epochs on private frames — data stays put</small></span>
         <span v-else-if="n === 3"><strong>Upload updates</strong><small>only weights/gradients cross the boundary</small></span>
-        <span v-else><strong>Aggregate &amp; repeat</strong><small>FedAvg averages updates, then a new round starts</small></span>
+        <span v-else><strong>Aggregate &amp; repeat</strong><small>FedAvg creates a new global model and sends it back to every camera</small></span>
       </div>
     </div>
   </div>
@@ -85,10 +90,20 @@ const server = { x: 50, y: 47 }
   display: grid; justify-items: center; gap: .18rem; z-index: 2;
 }
 .client-dot {
+  position: relative;
   width: 2.5rem; height: 2.5rem; display: grid; place-items: center;
   border-radius: 50%; border: 2px solid var(--deck-teal); background: #fff;
   color: var(--deck-teal); font-family: 'IBM Plex Mono', monospace;
   font-size: .72rem !important; font-weight: 700; transition: .3s ease;
+}
+.client-dot::after {
+  content: 'ωG';
+  position: absolute; right: -.42rem; bottom: -.18rem;
+  display: grid; place-items: center; width: 1.18rem; height: .82rem;
+  border: 2px solid #fff; border-radius: .22rem;
+  background: var(--deck-green); color: #fff;
+  font-family: 'IBM Plex Mono', monospace; font-size: .48rem !important;
+  opacity: 0;
 }
 .client-sub { font-size: .58rem !important; color: var(--deck-muted); font-family: 'IBM Plex Mono', monospace; }
 .train-badge {
@@ -116,16 +131,27 @@ const server = { x: 50, y: 47 }
 }
 
 .packet {
-  position: absolute; width: .7rem; height: .7rem; border-radius: 50%;
+  position: absolute; width: 1.34rem; height: .86rem; border-radius: .22rem;
+  display: grid; place-items: center;
+  border: 2px solid #fff; box-shadow: 0 1px 5px rgba(16, 32, 43, .18);
+  color: #fff; font-family: 'IBM Plex Mono', monospace;
+  font-size: .46rem !important; font-weight: 700;
   transform: translate(-50%, -50%); z-index: 3;
 }
-.packet.out { background: var(--deck-teal); animation: fly-out 1.9s ease-in-out infinite; }
-.packet.inn { background: var(--deck-orange); animation: fly-in 1.9s ease-in-out infinite; }
+.packet.out { background: var(--deck-teal); animation: fly-out 1.55s ease-in-out 1 both; }
+.packet.out.repeat { background: var(--deck-green); animation-name: fly-out-repeat; }
+.packet.inn { background: var(--deck-orange); animation: fly-in 1.55s ease-in-out 1 both; }
 @keyframes fly-out {
   0% { left: 50%; top: 47%; opacity: 0; }
   12% { opacity: 1; }
   85% { opacity: 1; }
   100% { left: var(--cx); top: var(--cy); opacity: 0; }
+}
+@keyframes fly-out-repeat {
+  0% { left: 50%; top: 47%; opacity: 0; transform: translate(-50%, -50%) scale(.72); }
+  14% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  84% { opacity: 1; }
+  100% { left: var(--cx); top: var(--cy); opacity: 0; transform: translate(-50%, -50%) scale(.86); }
 }
 @keyframes fly-in {
   0% { left: var(--cx); top: var(--cy); opacity: 0; }
@@ -141,11 +167,24 @@ const server = { x: 50, y: 47 }
   55% { box-shadow: 0 0 0 .6rem rgba(217, 119, 6, 0); }
 }
 
-.fl-scene[data-phase="4"] .server-box { background: var(--deck-green); animation: server-glow 1.5s ease-in-out infinite; }
+.fl-scene[data-phase="4"] .server-box { background: var(--deck-green); animation: server-glow .9s ease-out 1 both; }
 .fl-scene[data-phase="4"] .agg-badge { opacity: 1; transform: translateY(0); }
+.fl-scene[data-phase="4"] .client-dot {
+  border-color: var(--deck-green);
+  animation: client-receives .36s var(--receive-delay) ease-out 1 both;
+}
+.fl-scene[data-phase="4"] .client-dot::after { animation: model-received .36s var(--receive-delay) ease-out 1 both; }
 @keyframes server-glow {
   0%, 100% { box-shadow: 0 0 0 0 rgba(47, 107, 91, .4); }
   55% { box-shadow: 0 0 0 .75rem rgba(47, 107, 91, 0); }
+}
+@keyframes client-receives {
+  from { box-shadow: 0 0 0 0 rgba(47, 107, 91, .32); }
+  to { box-shadow: 0 0 0 .28rem rgba(47, 107, 91, .16); }
+}
+@keyframes model-received {
+  from { opacity: 0; transform: translateY(3px) scale(.75); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .fl-steps { display: grid; gap: .48rem; }

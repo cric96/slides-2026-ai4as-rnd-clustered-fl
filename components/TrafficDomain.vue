@@ -7,5 +7,5 @@ const step = computed(() => Math.min(props.click ?? 0, 3))
 </script>
 
 <template>
-  <TrafficCity mode="federated" :step="step" />
+  <TrafficCity mode="reference" :step="step" />
 </template>

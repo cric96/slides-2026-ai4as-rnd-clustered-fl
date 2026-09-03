@@ -36,18 +36,25 @@ class: viz-slide
 
 <div class="slide-shell">
 
-# Reference
+# Reference scenario: traffic forecasting at city scale
 
 <div class="split-grid domain-grid">
 
 <div class="static-points">
 
-- Consider a **traffic forecasting** scenario with multiple roadside cameras.
-- Their local worlds are visibly <u>different</u>: queues, steady flow, event surges, and fast sparse traffic.
-- The goal is to **merge what the cameras learn**, then reuse the resulting model wherever those patterns recur.
-- Raw video remains **private, regulated, or too heavy to move**: only learning can travel.
+<ul>
+  <li>
+    Consider a <strong>traffic forecasting</strong> scenario: each roadside camera predicts upcoming vehicle queues and congestion.
+  </li>
+  <li v-click="1">
+    A city contains <strong>diverse traffic regimes</strong>: e.g. congested <em>City Centre</em> vs. fast, sparse <em>Ring Road</em> flow.
+  </li>
+  <li v-click="2">
+    At city scale, <strong>dozens of cameras</strong> run in parallel, but raw video is <strong>private, regulated, and too heavy to centralize</strong>.
+  </li>
+</ul>
 
-<div class="value-strip">
+<div v-click="2" class="value-strip">
   <span class="value-label">The systems question:</span>
   How can one merged model carry experience back to every junction without <u>centralizing</u> observations?
 </div>
@@ -55,7 +62,7 @@ class: viz-slide
 </div>
 
 <TrafficDomain :click="$clicks" />
-<div v-click="1" class="click-marker" /><div v-click="2" class="click-marker" /><div v-click="3" class="click-marker" />
+<div v-click="1" class="click-marker" /><div v-click="2" class="click-marker" />
 
 </div>
 
@@ -96,7 +103,7 @@ class: viz-slide
 
 <div class="slide-shell">
 
-# One global model meets several different worlds
+# Federeted learning struggles with non-IID data
 
 <div class="split-grid wide-visual-grid">
 
@@ -139,14 +146,14 @@ class: stage-slide
 
 <div class="slide-shell">
 
-# Clustered FL reuses models across compatible junctions
+# Clustered FL specializes models by client group
+
+> Clients with similar data distributions collaborate on one shared model per cluster, instead of being forced into a single global average.
 
 <ClusteredFL :click="$clicks" />
 <div v-click="1" class="click-marker" /><div v-click="2" class="click-marker" />
 
-<p class="centered-claim">Compatible junctions <strong>merge updates into one specialized model</strong>, then reuse it wherever that traffic recurs.</p>
-
-<div class="inline-note center-note cfl-catch"><strong>The catch:</strong> how do you cluster clients when their data can never be observed?</div>
+<div v-click="2" class="inline-note center-note cfl-catch"><strong>The catch:</strong> how do you cluster clients when their data can never be observed?</div>
 
 <Cites refs="3,4" />
 
@@ -202,7 +209,10 @@ class: stage-slide
 
 <div class="slide-shell">
 
-# Discover collaborators before task training
+# Contribution 
+## Discover collaborators before task training
+
+- Instead of evaluating the full task model at every round, we propose a **pre-clustering phase** that runs on **tiny auxiliary predictors**.
 
 <div class="three-up contribution-row">
   <div class="contribution-item teal-top">

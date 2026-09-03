@@ -53,7 +53,14 @@ export const trafficSites: TrafficSite[] = [
     x: 17,
     y: 22,
     cluster: 'a',
-    vehicles: makeFleet(9, 13.2, 1),
+    vehicles: [
+      { direction: 'east', duration: 13.0, delay: 0, track: 0, tone: 'teal', kind: 'car' },
+      { direction: 'east', duration: 13.0, delay: 0, track: 0, tone: 'orange', kind: 'car' },
+      { direction: 'west', duration: 13.0, delay: 0, track: 0, tone: 'plum', kind: 'van' },
+      { direction: 'west', duration: 13.0, delay: 0, track: 0, tone: 'teal', kind: 'car' },
+      { direction: 'south', duration: 13.0, delay: 0, track: 0, tone: 'green', kind: 'car' },
+      { direction: 'north', duration: 13.0, delay: 0, track: 0, tone: 'orange', kind: 'car' },
+    ],
   },
   {
     id: 'school',
@@ -63,7 +70,13 @@ export const trafficSites: TrafficSite[] = [
     x: 50,
     y: 22,
     cluster: 'b',
-    vehicles: makeFleet(8, 11.8, 2, ['east', 'west', 'east', 'west', 'south']),
+    vehicles: [
+      { direction: 'east', duration: 12.0, delay: 0, track: 0, tone: 'orange', kind: 'car' },
+      { direction: 'east', duration: 12.0, delay: 0, track: 0, tone: 'teal', kind: 'van' },
+      { direction: 'west', duration: 12.0, delay: 0, track: 0, tone: 'plum', kind: 'car' },
+      { direction: 'west', duration: 12.0, delay: 0, track: 0, tone: 'green', kind: 'car' },
+      { direction: 'south', duration: 12.0, delay: 0, track: 0, tone: 'teal', kind: 'car' },
+    ],
   },
   {
     id: 'ring',
@@ -73,7 +86,12 @@ export const trafficSites: TrafficSite[] = [
     x: 83,
     y: 22,
     cluster: 'c',
-    vehicles: makeFleet(4, 5.2, 3, ['east', 'west']),
+    vehicles: [
+      { direction: 'east', duration: 5.0, delay: -5.0, track: 0, tone: 'teal', kind: 'car' },
+      { direction: 'east', duration: 5.0, delay: -2.5, track: 0, tone: 'orange', kind: 'van' },
+      { direction: 'west', duration: 5.0, delay: -3.8, track: 0, tone: 'plum', kind: 'car' },
+      { direction: 'west', duration: 5.0, delay: -1.3, track: 0, tone: 'green', kind: 'car' },
+    ],
   },
   {
     id: 'stadium',
@@ -83,7 +101,14 @@ export const trafficSites: TrafficSite[] = [
     x: 83,
     y: 78,
     cluster: 'a',
-    vehicles: makeFleet(10, 9.4, 4),
+    vehicles: [
+      { direction: 'north', duration: 10.0, delay: 0, track: 0, tone: 'plum', kind: 'car' },
+      { direction: 'north', duration: 10.0, delay: -0.35, track: 0, tone: 'teal', kind: 'van' },
+      { direction: 'south', duration: 10.0, delay: 0, track: 0, tone: 'orange', kind: 'car' },
+      { direction: 'south', duration: 10.0, delay: -0.35, track: 0, tone: 'green', kind: 'car' },
+      { direction: 'east', duration: 10.0, delay: 0, track: 0, tone: 'plum', kind: 'car' },
+      { direction: 'west', duration: 10.0, delay: 0, track: 0, tone: 'teal', kind: 'car' },
+    ],
   },
   {
     id: 'residential',
@@ -93,7 +118,12 @@ export const trafficSites: TrafficSite[] = [
     x: 17,
     y: 78,
     cluster: 'b',
-    vehicles: makeFleet(6, 10.8, 5, ['north', 'south', 'east']),
+    vehicles: [
+      { direction: 'east', duration: 10.0, delay: 0, track: 0, tone: 'green', kind: 'car' },
+      { direction: 'west', duration: 10.0, delay: 0, track: 0, tone: 'teal', kind: 'car' },
+      { direction: 'north', duration: 10.0, delay: 0, track: 0, tone: 'plum', kind: 'car' },
+      { direction: 'south', duration: 10.0, delay: 0, track: 0, tone: 'orange', kind: 'van' },
+    ],
   },
   {
     id: 'arterial',
@@ -103,7 +133,12 @@ export const trafficSites: TrafficSite[] = [
     x: 50,
     y: 78,
     cluster: 'c',
-    vehicles: makeFleet(5, 5.9, 6, ['east', 'west', 'south']),
+    vehicles: [
+      { direction: 'east', duration: 6.2, delay: 0, track: 0, tone: 'teal', kind: 'van' },
+      { direction: 'east', duration: 6.2, delay: -3.1, track: 0, tone: 'orange', kind: 'car' },
+      { direction: 'west', duration: 6.2, delay: 0, track: 0, tone: 'plum', kind: 'car' },
+      { direction: 'west', duration: 6.2, delay: -3.1, track: 0, tone: 'green', kind: 'car' },
+    ],
   },
 ]
 
