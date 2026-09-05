@@ -1,5 +1,18 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import MathTex from './MathTex.vue'
+
+const props = defineProps<{ click?: number }>()
+const currentStep = computed(() => Math.min(Math.max(props.click ?? 0, 0), 2))
+
+// 0: how the predictor is trained, 1: familiar input, 2: shifted input
+function stepClass(index: number) {
+  return {
+    'is-active': currentStep.value === index,
+    'is-past': currentStep.value > index,
+    'is-future': currentStep.value < index,
+  }
+}
 </script>
 
 <template>
@@ -9,12 +22,12 @@ import MathTex from './MathTex.vue'
     aria-label="RND mechanism: training a local predictor to mimic a frozen target, then using prediction error to detect novelty"
   >
     <!-- ─── PHASE 1: LOCAL TRAINING ─── -->
-    <section class="rnd-card training-card">
+    <section class="rnd-card training-card" :class="stepClass(0)">
       <div class="card-header header-teal">
         <span class="step-badge">1</span>
         <div class="header-text">
           <span class="header-title">LOCAL TRAINING PHASE</span>
-          <span class="header-desc">Client <MathTex math="d_i" /> trains on private data <MathTex math="\mathcal{B}_i" /></span>
+          <span class="header-desc">Device <MathTex math="d_i" /> trains on local data <MathTex math="\mathcal{B}_i" /></span>
         </div>
       </div>
 
@@ -25,7 +38,7 @@ import MathTex from './MathTex.vue'
           <div class="math-main">
             <MathTex math="x \sim \mathcal{B}_i" />
           </div>
-          <span class="box-sub">private data</span>
+          <span class="box-sub">local data</span>
         </div>
 
         <!-- Fork SVG Arrow -->
@@ -92,7 +105,7 @@ import MathTex from './MathTex.vue'
     </section>
 
     <!-- ─── PHASE 2: INFERENCE / NOVELTY EVALUATION ─── -->
-    <section class="rnd-card inference-card">
+    <section class="rnd-card inference-card" :class="{ 'is-future': currentStep < 1 }">
       <div class="card-header header-green">
         <span class="step-badge">2</span>
         <div class="header-text">
@@ -103,7 +116,7 @@ import MathTex from './MathTex.vue'
 
       <div class="test-rows">
         <!-- In-Distribution Case -->
-        <div class="test-row familiar-case">
+        <div class="test-row familiar-case" :class="stepClass(1)">
           <div class="test-input">
             <span class="case-label">In-Distribution Input</span>
             <div class="case-math"><MathTex math="x \sim \mathcal{B}_i" /></div>
@@ -115,7 +128,6 @@ import MathTex from './MathTex.vue'
             </svg>
           </div>
           <div class="test-behavior">
-            <span class="behavior-title">Predictor has converged on this support</span>
             <div class="behavior-math"><MathTex math="\hat{f}_i(x) \approx f(x) \implies \|\hat{f}_i(x) - f(x)\|_2^2 \approx 0" /></div>
           </div>
           <div class="arrow-inline">
@@ -131,7 +143,7 @@ import MathTex from './MathTex.vue'
         </div>
 
         <!-- Out-of-Distribution Case -->
-        <div class="test-row novel-case">
+        <div class="test-row novel-case" :class="stepClass(2)">
           <div class="test-input">
             <span class="case-label">Unfamiliar / Shifted Input</span>
             <div class="case-math"><MathTex math="x' \notin \mathcal{B}_i" /></div>
@@ -143,7 +155,6 @@ import MathTex from './MathTex.vue'
             </svg>
           </div>
           <div class="test-behavior">
-            <span class="behavior-title">Predictor generalisation fails on unseen domain</span>
             <div class="behavior-math"><MathTex math="\hat{f}_i(x') \neq f(x') \implies \|\hat{f}_i(x') - f(x')\|_2^2 \gg 0" /></div>
           </div>
           <div class="arrow-inline">
@@ -175,6 +186,31 @@ import MathTex from './MathTex.vue'
   box-shadow: 0 2px 10px rgba(16, 32, 43, 0.04);
   border-radius: 6px;
   overflow: hidden;
+}
+
+.rnd-card,
+.test-row {
+  transition: opacity 300ms ease, transform 300ms ease, border-color 300ms ease,
+    box-shadow 300ms ease;
+}
+
+.rnd-card.is-future,
+.test-row.is-future {
+  opacity: 0.32;
+  filter: grayscale(40%);
+}
+
+.rnd-card.is-past,
+.test-row.is-past {
+  opacity: 0.85;
+}
+
+.rnd-card.is-active,
+.test-row.is-active {
+  opacity: 1;
+  transform: translateY(-2px);
+  border-color: rgba(15, 76, 92, 0.4);
+  box-shadow: 0 6px 20px rgba(15, 76, 92, 0.12);
 }
 
 .card-header {
@@ -252,7 +288,7 @@ import MathTex from './MathTex.vue'
 }
 
 .box-tag {
-  font-size: 0.52rem;
+  font-size: 0.6rem;
   font-weight: 700;
   letter-spacing: 0.05em;
   color: var(--deck-muted);
@@ -268,7 +304,7 @@ import MathTex from './MathTex.vue'
 }
 
 .box-sub {
-  font-size: 0.58rem;
+  font-size: 0.6rem;
   color: var(--deck-muted);
 }
 
@@ -333,7 +369,7 @@ import MathTex from './MathTex.vue'
 
 .badge-status {
   display: inline-block;
-  font-size: 0.5rem;
+  font-size: 0.6rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   padding: 0.06rem 0.3rem;
@@ -379,7 +415,7 @@ import MathTex from './MathTex.vue'
 }
 
 .feedback-label {
-  font-size: 0.58rem;
+  font-size: 0.6rem;
   font-weight: 600;
   color: #9a5302;
 }
@@ -423,7 +459,7 @@ import MathTex from './MathTex.vue'
 }
 
 .case-label {
-  font-size: 0.52rem;
+  font-size: 0.6rem;
   color: var(--deck-muted);
   font-weight: 600;
   white-space: nowrap;
@@ -458,13 +494,6 @@ import MathTex from './MathTex.vue'
   padding: 0.22rem 0.6rem;
 }
 
-.behavior-title {
-  font-size: 0.52rem;
-  color: var(--deck-muted);
-  font-weight: 600;
-  white-space: nowrap;
-}
-
 .behavior-math {
   font-size: 0.74rem;
   color: var(--deck-ink);
@@ -483,7 +512,7 @@ import MathTex from './MathTex.vue'
 }
 
 .verdict-tag {
-  font-size: 0.52rem;
+  font-size: 0.6rem;
   font-weight: 700;
   letter-spacing: 0.05em;
   white-space: nowrap;

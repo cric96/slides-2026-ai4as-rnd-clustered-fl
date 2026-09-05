@@ -129,7 +129,7 @@ export const trafficSites: TrafficSite[] = [
     id: 'arterial',
     camera: 'CAM 05',
     name: 'ARTERIAL',
-    flow: 'fast through-traffic',
+    flow: 'fast through flow',
     x: 50,
     y: 78,
     cluster: 'c',

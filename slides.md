@@ -21,7 +21,11 @@ defaults:
   <div class="cover-rule" />
   <div class="cover-meta-row">
     <div class="cover-mini-meta">Davide Domini · <strong style="color: var(--deck-orange);">Gianluca Aguzzi</strong> · Ivana Dusparic · Danilo Pianini · Mirko Viroli</div>
-    <div class="cover-mini-meta">University of Bologna · Trinity College Dublin</div>
+  </div>
+  <div class="cover-affiliations">
+    <BaseImg src="figures/logo-unibo.png" alt="Alma Mater Studiorum — Università di Bologna" class="affiliation-logo logo-unibo" />
+    <span class="affiliation-divider" aria-hidden="true" />
+    <BaseImg src="figures/logo-trinity.png" alt="Trinity College Dublin, The University of Dublin" class="affiliation-logo logo-trinity" />
   </div>
 </div>
 
@@ -36,7 +40,9 @@ class: viz-slide
 
 <div class="slide-shell">
 
-# Reference scenario: traffic forecasting at city scale
+# Reference scenario
+
+## Traffic forecasting at city scale
 
 <div class="split-grid domain-grid">
 
@@ -44,19 +50,19 @@ class: viz-slide
 
 <ul>
   <li>
-    Consider a <strong>traffic forecasting</strong> scenario: each roadside camera predicts upcoming vehicle queues and congestion.
+    Consider a <strong>traffic forecasting</strong> scenario: each roadside device predicts upcoming vehicle queues from its own camera feed.
   </li>
   <li v-click="1">
     A city contains <strong>diverse traffic regimes</strong>: e.g. congested <em>City Centre</em> vs. fast, sparse <em>Ring Road</em> flow.
   </li>
   <li v-click="2">
-    At city scale, <strong>dozens of cameras</strong> run in parallel, but raw video is <strong>private, regulated, and too heavy to centralize</strong>.
+    At city scale, <strong>dozens of devices</strong> run in parallel, but raw video is <strong>private, regulated, and too heavy to centralize</strong>.
   </li>
 </ul>
 
 <div v-click="2" class="value-strip">
   <span class="value-label">The systems question:</span>
-  How can one merged model carry experience back to every junction without <u>centralizing</u> observations?
+  How can experience gathered at one junction reach the <u>other</u> junctions?
 </div>
 
 </div>
@@ -79,9 +85,9 @@ class: stage-slide top-slide
 
 <div class="slide-shell">
 
-# Federated learning - the standard approach
+# Federated learning - Standard paradigm
 
-> a distributed learning paradigm where clients train a shared model collaboratively without sharing their raw data.
+> a distributed learning paradigm where devices train a shared model collaboratively without sharing their raw data.
 
 <FederatedLearning :click="$clicks" />
 <div v-click="1" class="click-marker" /><div v-click="2" class="click-marker" /><div v-click="3" class="click-marker" />
@@ -103,23 +109,20 @@ class: viz-slide
 
 <div class="slide-shell">
 
-# Federated learning struggles with non-IID data
+# Data heterogeneity
+
+## Federated learning struggles with non-IID data
 
 <div class="split-grid wide-visual-grid">
 
 <div class="static-points">
 
-- City center, suburb, highway, and event district produce very different **feature distributions**: different cars, speeds, and flow patterns.
-- Local updates then optimize **different objectives**, even though every client solves the same task.
-- Averaging conflicting updates lowers accuracy and destabilizes convergence: the **non-IID problem**.
-- Standard FedAvg is **known to degrade** exactly in this regime.
-
-<div class="inline-note" :class="{ 'highlight-step': ($clicks || 0) >= 1 && ($clicks || 0) <= 2 }">
-  <strong>Structure matters:</strong> clients may be IID within a region and non-IID across regions.
-</div>
+- Different zones, different **feature distributions**: cars, speeds, flow patterns.
+- Local updates then optimize **different objectives**, on the very same task.
+- Averaging conflicting updates degrades FedAvg: the **non-IID problem**.
 
 <div class="inline-note angle-note" :class="{ 'highlight-angle': ($clicks || 0) >= 3 }">
-  <strong>Our angle:</strong> don't fight heterogeneity — find clusters that follow the data distribution.
+  <strong>This work:</strong> average only within groups of devices whose distributions already agree.
 </div>
 
 </div>
@@ -146,14 +149,16 @@ class: stage-slide
 
 <div class="slide-shell">
 
-# Clustered FL specializes models by client group
+# Clustered federated learning
 
-> Clients with similar data distributions collaborate on one shared model per cluster, instead of being forced into a single global average.
+## Specializing models by device group
+
+> Devices with similar distributions share one model per cluster, instead of one global average.
 
 <ClusteredFL :click="$clicks" />
 <div v-click="1" class="click-marker" /><div v-click="2" class="click-marker" />
 
-<div v-click="2" class="inline-note center-note cfl-catch"><strong>The catch:</strong> how do you cluster clients when their data can never be observed?</div>
+<div v-click="2" class="inline-note center-note cfl-catch"><strong>The catch:</strong> the groups must be inferred from the data that defines them &mdash; exactly what cannot be observed.</div>
 
 <Cites refs="3,4" />
 
@@ -172,12 +177,14 @@ class: stage-slide top-slide
 
 <div class="slide-shell">
 
-# The hidden cost is discovering the clusters
+# The bottleneck
+
+## Discovering the clusters is the hidden cost
 
 <div class="comparison-grid bottleneck-grid">
   <div class="comparison-card">
     <div class="card-title">IFCA</div>
-    <div class="card-text"><strong>Assume <MathTex math="K" /> is known.</strong><br>Every client evaluates all <MathTex math="K" /> full task models at every round, then joins the best one.</div>
+    <div class="card-text"><strong>Assume <MathTex math="K" /> is known.</strong><br>Every device evaluates all <MathTex math="K" /> full task models at every round, then joins the best one.</div>
   </div>
   <div class="comparison-card">
     <div class="card-title">Self-FL / PSFL</div>
@@ -214,30 +221,29 @@ class: stage-slide
 
 <div class="slide-shell">
 
-# Contribution 
-## Discover collaborators before task training
+# Contribution
 
-- Instead of evaluating the full task model at every round, we propose a **pre-clustering phase** that runs on **tiny auxiliary predictors**.
+## Decouple federation discovery from task learning
 
 <div class="three-up contribution-row">
   <div class="contribution-item teal-top">
     <div class="contribution-number">01</div>
-    <h3>Novelty as a proxy</h3>
-    <p>Import <strong>Random Network Distillation</strong> from reinforcement learning: a tiny auxiliary model whose prediction error measures how "familiar" local data is — an ultra-cheap proxy for distribution shift.</p>
+    <h3>Lightweight signal</h3>
+    <p>Use compact <strong>RND predictors</strong> as a task-agnostic proxy for distributional compatibility.</p>
   </div>
   <div class="contribution-item green-top">
     <div class="contribution-number">02</div>
     <h3>Decoupled discovery</h3>
-    <p>Separate clustering from the primary learning loop: discover once at <MathTex math="r=0" /> (or periodically every <MathTex math="\tau" /> rounds) instead of evaluating full models at every training round.</p>
+    <p>Run discovery <strong>before task learning</strong>, then only periodically when distributions may change.</p>
   </div>
   <div class="contribution-item orange-top">
     <div class="contribution-number">03</div>
     <h3>Emergent federations</h3>
-    <p>Derive collaboration groups dynamically from observed pairwise novelty, so the <strong>number of clusters is not fixed in advance</strong>: it emerges from data compatibility.</p>
+    <p>Infer both group membership and the <strong>number of federations</strong> from pairwise novelty.</p>
   </div>
 </div>
 
-<p class="centered-claim" style="margin-top: 1.4rem;">The resulting pre-clustering phase is <strong>task-agnostic</strong> and can precede any standard FL algorithm.</p>
+<p class="centered-claim" style="margin-top: 1.25rem;">A modular pre-clustering phase that can precede <strong>any standard FL algorithm</strong>.</p>
 
 </div>
 
@@ -254,11 +260,10 @@ class: stage-slide
 
 # Random Network Distillation
 
-<RNDMechanism />
+## Prediction error as a novelty signal
 
-<p class="centered-claim" style="margin-top: 0.55rem;">
-  RND turns a tiny model's <strong>local learning residual</strong> into a distribution fingerprint — without labels, without data sharing, and without task-model training.
-</p>
+<RNDMechanism :click="$clicks" />
+<div v-click="1" class="click-marker" /><div v-click="2" class="click-marker" />
 
 <Cites refs="5" />
 
@@ -278,7 +283,7 @@ class: stage-slide
 
 # From novelty to compatibility
 
-## Estimating pairwise distributional divergence without sharing data
+## Estimating pairwise distributional divergence from cross-evaluated predictors
 
 <CompatibilityRule />
 
@@ -295,7 +300,9 @@ class: stage-slide
 
 <div class="slide-shell">
 
-# RND-based federation discovery
+# Federation discovery
+
+## Inside one RND phase, end to end
 
 <RNDClusteringPipeline :click="$clicks" />
 <div v-click="1" class="click-marker" /><div v-click="2" class="click-marker" />
@@ -308,62 +315,23 @@ Pipeline and compatibility rule: AI4AS_2026.pdf, Section IV-B and Algorithms 1�
 
 ---
 layout: default
-class: code-slide
+class: stage-slide
 ---
 
-<div class="slide-shell algorithm-slide">
+<div class="slide-shell">
 
-# Algorithm 1: device-side novelty estimation
+# Discovery is decoupled from task learning
 
-```python {1|2,4|6-8|10}
-predictor_i = train_rnd(local_data, shared_target)
-send(predictor_i)
+## Cluster once — or every τ rounds — then train as usual
 
-predictors = receive_all_predictors()
-
-for j, predictor_j in enumerate(predictors):
-    score[j] = mean_squared_error(
-        predictor_j(local_data), shared_target(local_data))
-
-send_novelty_row(score)
-```
-
-<AlgorithmLegend1 :click="$clicks" />
+<CadenceDiagram :click="$clicks" />
+<div v-click="1" class="click-marker" /><div v-click="2" class="click-marker" />
 
 </div>
 
 <!-- [Sources]
-Pseudocode adapted from Algorithm 1, Device-Side RND Novelty Estimation, in the supplied manuscript.
--->
-
----
-layout: default
-class: code-slide
----
-
-<div class="slide-shell algorithm-slide">
-
-# Algorithm 2: server-side federation discovery
-
-```python {1-3|5-7|9-10}
-for round in training:
-    if round == 0 or round % tau == 0:
-        predictors = collect_and_distribute_predictors()
-
-        rows = collect_novelty_rows()
-        S = build_novelty_matrix(rows)
-        federations = extract_federations(S, epsilon)
-
-    for federation in federations:
-        run_federated_learning(federation)
-```
-
-<AlgorithmLegend2 :click="$clicks" />
-
-</div>
-
-<!-- [Sources]
-Pseudocode adapted from Algorithm 2, Server-Side RND-Based Federation Discovery, in the supplied manuscript.
+End-to-end flow and decoupling principle: supplied manuscript, Abstract and Introduction.
+Re-clustering cadence: supplied manuscript, Clustering Frequency paragraph and Algorithm 2.
 -->
 
 ---
@@ -373,27 +341,29 @@ class: viz-slide
 
 <div class="slide-shell">
 
-# Experimental setup: CIFAR-10 under clustered feature skew
+# Experimental setup
+
+## CIFAR-10 under clustered feature skew
 
 <div class="three-up contribution-row">
   <div class="contribution-item teal-top">
     <div class="contribution-number">01</div>
     <h3>Decentralized setup</h3>
-    <p><strong>CIFAR-10 benchmark</strong> with <MathTex math="N = 12" /> devices solving the same 10-class task on private local data <MathTex math="\mathcal{B}_i" />.</p>
+    <p><strong>CIFAR-10 benchmark</strong> with <MathTex math="N = 12" /> devices solving the same 10-class task on local data <MathTex math="\mathcal{B}_i" />.</p>
   </div>
   <div class="contribution-item orange-top">
     <div class="contribution-number">02</div>
     <h3>Clustered feature skew</h3>
-    <p><MathTex math="k = 4" /> latent groups (3 devices each): identical <MathTex math="P_i(y)" />, but distinct feature distributions <MathTex math="P_i(x|y)" /> across groups.</p>
+    <p><MathTex math="k = 4" /> latent groups (3 devices each): identical <MathTex math="P_i(y)" />, but a <strong>different Gaussian noise</strong> per group shifts <MathTex math="P_i(x|y)" />.</p>
   </div>
   <div class="contribution-item green-top">
     <div class="contribution-number">03</div>
-    <h3>Baselines & rigor</h3>
+    <h3>Baseline</h3>
     <p>Evaluated against <strong>IFCA</strong> (full ResNet-18 task model evaluations), averaged across <strong>10 independent seeds</strong>.</p>
   </div>
 </div>
 
-<p class="centered-claim">Ground truth by construction (<MathTex math="k=4" /> groups known): allows verifying whether RND <strong>recovers the latent partition without ever observing labels</strong>.</p>
+<p class="centered-claim">The <MathTex math="k = 4" /> groups are fixed by construction, so the recovered partition can be scored <strong>directly against ground truth</strong>.</p>
 
 <Cites refs="6,7,8" />
 
@@ -412,7 +382,9 @@ class: viz-slide
 
 <div class="slide-shell result-slide">
 
-# Novelty matrix recovers the latent group structure
+# Results
+
+## Novelty matrix recovers the latent group structure
 
 <div class="result-pair">
   <div class="paper-figure-shell result-figure">
@@ -423,7 +395,7 @@ class: viz-slide
   </div>
 </div>
 
-<div class="result-takeaway"><strong>Near-zero blocks on the diagonal</strong> identify compatible devices; novelty rises sharply across group boundaries — the latent partition emerges from pairwise scores alone, with no label and no task training.</div>
+<div class="result-takeaway"><strong>Near-zero blocks on the diagonal</strong> mark devices from the same group; novelty rises sharply at every group boundary, reproducing the <MathTex math="k = 4" /> partition used to build the benchmark.</div>
 
 </div>
 
@@ -438,7 +410,9 @@ class: viz-slide
 
 <div class="slide-shell result-slide">
 
-# Clustering overhead: RND vs. IFCA
+# Results
+
+## Clustering overhead: RND vs. IFCA
 
 <div class="split-grid timing-grid">
   <div class="paper-figure-shell timing-figure">
@@ -461,42 +435,47 @@ Claim wording follows the manuscript: "about one order of magnitude lower" in th
 
 ---
 layout: default
-class: end-slide top-slide
+class: end-slide
 transition: fade
 ---
 
 <div class="slide-shell conclusion-slide">
 
-# Conclusions and future work
+# Conclusions
 
-<div class="three-up conclusion-row">
+## Clustered FL stays effective while discovery becomes cheap
+
+<div class="closing-claims">
   <div class="conclusion-item teal-top">
-    <h3>Effective signal</h3>
-    <p>RND residuals reveal the latent groups created by clustered feature skew — before any task training happens.</p>
+    <span class="eyebrow">Effective</span>
+    <h3>Novelty recovers the latent groups</h3>
+    <p>RND residuals reproduce the <MathTex math="k = 4" /> partition from feature skew alone — and the number of federations <strong>emerges</strong> instead of being fixed a priori.</p>
   </div>
   <div class="conclusion-item green-top">
-    <h3>Lightweight discovery</h3>
-    <p>Small predictors and a separate schedule cut clustering overhead by about an order of magnitude.</p>
-  </div>
-  <div class="conclusion-item orange-top">
-    <h3>Private by design</h3>
-    <p>Raw observations stay local; collaboration relies on compact auxiliary predictors and novelty scores.</p>
+    <span class="eyebrow">Lightweight</span>
+    <h3>An order of magnitude below IFCA</h3>
+    <p>A 2-layer predictor plus a decoupled cadence. Only predictor weights and novelty rows are exchanged — <strong>never the local samples</strong>.</p>
   </div>
 </div>
 
-<div class="future-grid">
+<div class="open-grid">
   <div>
-    <span class="eyebrow">Current boundary</span>
-    <p>Preliminary evidence on 12 CIFAR-10 clients with synthetic feature skew; centralized all-to-all evaluation scales quadratically with the number of clients (<MathTex math="\mathcal{O}(N^2)" />).</p>
+    <span class="eyebrow">Scale</span>
+    <p>All-to-all evaluation is <MathTex math="\mathcal{O}(N^2)" />; a decentralized version restricts exchange to neighborhoods.</p>
   </div>
   <div>
-    <span class="eyebrow">Next</span>
-    <p>Larger and real-world sensing deployments, neighborhood-only exchange, adaptive <MathTex math="\epsilon" />, and robustness to Byzantine, Sybil, and masquerade attacks.</p>
+    <span class="eyebrow">Realism</span>
+    <p>Beyond 12 devices and synthetic skew: larger, real-world sensing deployments.</p>
+  </div>
+  <div>
+    <span class="eyebrow">Robustness</span>
+    <p>Self-adaptive <MathTex math="\epsilon" />, and Byzantine, Sybil, and masquerade attacks.</p>
   </div>
 </div>
 
-<div style="display: flex; justify-content: center; margin-top: 0.2rem;">
+<div class="closing-cta">
   <QrCard title="Code & Experiments" url="https://github.com/domm99/experiments-2026-uncertainty-based-clustered-fl" :size="3.2" />
+  <p>Discovery is a <strong>modular pre-clustering phase</strong>: it can precede any standard FL algorithm.</p>
 </div>
 
 </div>

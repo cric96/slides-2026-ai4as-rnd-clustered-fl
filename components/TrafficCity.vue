@@ -184,8 +184,6 @@ function arrowHeadPath(x1: number, y1: number, x2: number, y2: number, size = 3.
     </div>
 
     <template v-if="mode !== 'reference'">
-      <div class="privacy-note"><span aria-hidden="true">■</span> raw video stays at each camera</div>
-
       <div class="global-model">
         <strong v-if="mode === 'federated' && currentStep === 2">MERGE</strong>
         <strong v-else>ωG</strong>
@@ -209,7 +207,6 @@ function arrowHeadPath(x1: number, y1: number, x2: number, y2: number, size = 3.
       <div class="map-status status-local">six local models</div>
       <div class="map-status status-merge">updates meet here</div>
       <div class="map-status status-shared">one model reaches all six junctions</div>
-      <div class="map-status status-groups">similar traffic — not nearby streets — defines each group</div>
       <div class="map-status status-specialized">three merged models, each reused at compatible junctions</div>
     </template>
   </div>
@@ -447,7 +444,7 @@ function arrowHeadPath(x1: number, y1: number, x2: number, y2: number, size = 3.
 .site-label span {
   display: block;
   color: var(--map-muted);
-  font-size: 0.48rem !important;
+  font-size: 0.6rem !important;
   letter-spacing: 0.06em;
 }
 
@@ -461,7 +458,7 @@ function arrowHeadPath(x1: number, y1: number, x2: number, y2: number, size = 3.
 .site-label small {
   display: block;
   color: var(--map-muted);
-  font-size: 0.47rem !important;
+  font-size: 0.6rem !important;
 }
 
 .hero-forecast-badge {
@@ -478,7 +475,7 @@ function arrowHeadPath(x1: number, y1: number, x2: number, y2: number, size = 3.
   border-radius: 5px;
   font-family: var(--deck-font-mono);
   color: var(--deck-teal);
-  font-size: 0.55rem !important;
+  font-size: 0.6rem !important;
   letter-spacing: 0.04em;
   box-shadow: 0 2px 8px rgba(15, 76, 92, 0.14);
   white-space: nowrap;
@@ -713,7 +710,7 @@ function arrowHeadPath(x1: number, y1: number, x2: number, y2: number, size = 3.
   background: var(--map-land);
   color: var(--map-shared);
   font-family: var(--deck-font-mono);
-  font-size: 0.55rem !important;
+  font-size: 0.6rem !important;
   font-weight: 600;
   opacity: 0;
   transform: scale(0.72);
@@ -728,7 +725,7 @@ function arrowHeadPath(x1: number, y1: number, x2: number, y2: number, size = 3.
   padding: var(--deck-space-3xs) var(--deck-space-2xs);
   border: 1px solid currentColor;
   background: var(--map-land);
-  font-size: 0.44rem !important;
+  font-size: 0.6rem !important;
   font-weight: 600;
   letter-spacing: 0.05em;
   opacity: 0;
@@ -759,12 +756,12 @@ function arrowHeadPath(x1: number, y1: number, x2: number, y2: number, size = 3.
   border: 1px solid color-mix(in oklch, var(--map-update) 65%, var(--map-land));
   background: var(--map-land);
   color: color-mix(in oklch, var(--map-update) 76%, var(--map-ink));
-  font-size: 0.48rem !important;
+  font-size: 0.6rem !important;
   letter-spacing: 0.035em;
   white-space: nowrap;
 }
 
-.privacy-note span { color: var(--map-update); font-size: 0.46rem !important; }
+.privacy-note span { color: var(--map-update); font-size: 0.6rem !important; }
 
 .global-model,
 .cluster-model {
@@ -794,7 +791,7 @@ function arrowHeadPath(x1: number, y1: number, x2: number, y2: number, size = 3.
 .global-model strong,
 .cluster-model strong { color: inherit; }
 .global-model strong { font-size: 0.76rem !important; line-height: 1; }
-.global-model small { max-width: 3.5rem; font-size: 0.46rem !important; line-height: 1.12; }
+.global-model small { max-width: 3.5rem; font-size: 0.6rem !important; line-height: 1.12; }
 
 .cluster-model {
   width: 3.45rem;
@@ -808,7 +805,7 @@ function arrowHeadPath(x1: number, y1: number, x2: number, y2: number, size = 3.
 .cluster-model.cluster-b { background: var(--cluster-b); }
 .cluster-model.cluster-c { background: var(--cluster-c); }
 .cluster-model strong { font-size: 0.68rem !important; line-height: 1; }
-.cluster-model small { max-width: 2.8rem; font-size: 0.44rem !important; line-height: 1.05; }
+.cluster-model small { max-width: 2.8rem; font-size: 0.6rem !important; line-height: 1.05; }
 
 .map-status {
   right: 1.2%;
@@ -818,7 +815,7 @@ function arrowHeadPath(x1: number, y1: number, x2: number, y2: number, size = 3.
   border-top: 2px solid var(--map-shared);
   background: var(--map-land);
   color: var(--map-ink);
-  font-size: 0.49rem !important;
+  font-size: 0.6rem !important;
   line-height: 1.25;
   text-align: right;
 }

@@ -13,7 +13,7 @@ import MathTex from './MathTex.vue'
           <span class="badge-num num-teal">1</span>
           <div>
             <strong>PAIRWISE CROSS-NOVELTY</strong>
-            <small>Paper Eq. (8) · Distributional divergence proxy</small>
+            <small>Cross-evaluated predictor residual</small>
           </div>
         </div>
 
@@ -22,7 +22,7 @@ import MathTex from './MathTex.vue'
         </div>
 
         <p class="card-caption">
-          Device <MathTex math="d_i" /> feeds private data <MathTex math="\mathcal{B}_i" /> through peer <MathTex math="d_j" />'s predictor.
+          Device <MathTex math="d_i" /> feeds its local data <MathTex math="\mathcal{B}_i" /> through peer <MathTex math="d_j" />'s predictor.
           <strong>Low residual</strong> indicates shared feature distributions.
         </p>
       </div>
@@ -33,7 +33,7 @@ import MathTex from './MathTex.vue'
           <span class="badge-num num-orange">2</span>
           <div>
             <strong>ADAPTIVE COMPATIBILITY CRITERION</strong>
-            <small>Paper Eq. (9) · Emergent cluster threshold</small>
+            <small>Threshold relative to self-novelty</small>
           </div>
         </div>
 
@@ -62,8 +62,7 @@ import MathTex from './MathTex.vue'
     <div class="decision-banner">
       <div class="decision-side side-compat">
         <div class="side-badge badge-green">
-          <span>COMPATIBLE:</span>
-          <MathTex math="s_{ij} \le s_{ii} + \epsilon \sigma_i" />
+          <span>COMPATIBLE</span>
         </div>
         <p>Peer's predictor generalizes well to local data <MathTex math="\mathcal{B}_i" /> &rarr; <strong>collaborate in same federation</strong></p>
       </div>
@@ -77,8 +76,7 @@ import MathTex from './MathTex.vue'
 
       <div class="decision-side side-diverge">
         <div class="side-badge badge-amber">
-          <span>DIVERGENT:</span>
-          <MathTex math="s_{ij} > s_{ii} + \epsilon \sigma_i" />
+          <span>DIVERGENT</span>
         </div>
         <p>Residual divergence indicates feature shift &rarr; <strong>separate into distinct federations</strong></p>
       </div>
@@ -145,7 +143,7 @@ import MathTex from './MathTex.vue'
 
 .card-header small {
   display: block;
-  font-size: 0.58rem;
+  font-size: 0.6rem;
   color: var(--deck-muted);
 }
 
@@ -207,7 +205,7 @@ import MathTex from './MathTex.vue'
 }
 
 .term-desc {
-  font-size: 0.52rem !important;
+  font-size: 0.6rem !important;
   color: var(--deck-muted);
   line-height: 1.15;
 }

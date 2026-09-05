@@ -6,6 +6,25 @@ const props = defineProps<{
 }>()
 
 const currentStep = computed(() => Math.min(Math.max(0, props.click ?? 0), 3))
+
+/* Ellipses tracing the four coloured blobs of figures/heterogeneity.png
+   (1620 x 971), plus a patch over the figure's own Non-IID arrow. */
+const zones = [
+  { id: 'purple', cx: 560, cy: 182, rx: 320, ry: 168 },
+  { id: 'blue', cx: 1145, cy: 370, rx: 278, ry: 280 },
+  { id: 'green', cx: 510, cy: 530, rx: 288, ry: 208 },
+  { id: 'orange', cx: 875, cy: 685, rx: 440, ry: 238 },
+  { id: 'arrow', cx: 1290, cy: 782, rx: 195, ry: 162 },
+]
+
+/* Step 2 lights one region (updates agree inside it); step 3 lights the two
+   regions the figure's own Non-IID arrow connects, so the contrast is drawn
+   between two visible zones instead of inside one box. */
+const litZones = computed(() => {
+  if (currentStep.value === 1) return ['orange']
+  if (currentStep.value === 2) return ['orange', 'blue', 'arrow']
+  return []
+})
 </script>
 
 <template>
@@ -13,34 +32,52 @@ const currentStep = computed(() => Math.min(Math.max(0, props.click ?? 0), 3))
     class="het-wrapper"
     :data-step="currentStep"
     role="img"
-    aria-label="Incremental diagram of heterogeneous client network showing IID within clusters and Non-IID across clusters"
+    aria-label="Incremental diagram of a heterogeneous device network showing IID within clusters and Non-IID across clusters"
   >
     <div class="het-canvas">
       <img
         src="/figures/heterogeneity.png"
-        alt="Network of clients grouped into 4 latent clusters"
+        alt="Network of devices grouped into 4 latent clusters"
         class="het-base-img"
       />
 
-      <!-- Overlay backdrop for dimming during spotlights -->
-      <div class="het-dimmer" aria-hidden="true" />
-
-      <!-- Step 1: IID within cluster highlight -->
-      <div class="spotlight-box spot-iid" :class="{ 'is-active': currentStep === 1 }">
-        <span class="spot-label">IID</span>
-      </div>
+      <!-- Spotlight: everything outside the lit regions is veiled, so the
+           highlight follows the real cluster shapes instead of a rectangle. -->
+      <svg
+        class="het-spotlight"
+        :class="{ 'is-on': litZones.length > 0 }"
+        viewBox="0 0 1620 971"
+        preserveAspectRatio="xMidYMid meet"
+        aria-hidden="true"
+      >
+        <defs>
+          <radialGradient id="het-hole">
+            <stop offset="0%" stop-color="#000" stop-opacity="1" />
+            <stop offset="64%" stop-color="#000" stop-opacity="1" />
+            <stop offset="100%" stop-color="#000" stop-opacity="0" />
+          </radialGradient>
+          <mask id="het-veil-mask">
+            <rect x="0" y="0" width="1620" height="971" fill="#fff" />
+            <ellipse
+              v-for="z in zones"
+              :key="z.id"
+              class="spot-hole"
+              :class="{ 'is-lit': litZones.includes(z.id) }"
+              :cx="z.cx" :cy="z.cy" :rx="z.rx" :ry="z.ry"
+              fill="url(#het-hole)"
+            />
+          </mask>
+        </defs>
+        <rect class="het-veil" x="0" y="0" width="1620" height="971" mask="url(#het-veil-mask)" />
+      </svg>
       <div class="callout-card card-iid" :class="{ 'is-active': currentStep === 1 }">
         <div class="card-tag tag-green">
           <span class="tag-icon">✔</span>
           <strong>IID within region</strong>
         </div>
-        <p>Clients share data distributions — local updates align and reinforce each other.</p>
+        <p>Devices share data distributions — local updates align and reinforce each other.</p>
       </div>
 
-      <!-- Step 2: Non-IID across clusters highlight -->
-      <div class="spotlight-box spot-non-iid" :class="{ 'is-active': currentStep === 2 }">
-        <span class="spot-label label-orange">Non-IID</span>
-      </div>
       <div class="callout-card card-non-iid" :class="{ 'is-active': currentStep === 2 }">
         <div class="card-tag tag-orange">
           <span class="tag-icon">✖</span>
@@ -128,71 +165,33 @@ const currentStep = computed(() => Math.min(Math.max(0, props.click ?? 0), 3))
   transition: filter var(--deck-dur-long) var(--deck-ease-out);
 }
 
-/* Subtle dimmer when spotlighting */
-.het-dimmer {
+/* Spotlight veil. A light wash rather than a dark one, so the lit clusters
+   keep their colour and the veiled ones simply recede. */
+.het-spotlight {
   position: absolute;
   inset: 0;
-  background: rgba(16, 32, 43, 0.32);
+  width: 100%;
+  height: 100%;
   opacity: 0;
   pointer-events: none;
   transition: opacity var(--deck-dur-long) var(--deck-ease-out);
 }
 
-.het-wrapper[data-step="1"] .het-dimmer,
-.het-wrapper[data-step="2"] .het-dimmer {
+.het-spotlight.is-on {
   opacity: 1;
 }
 
-/* Spotlight boxes */
-.spotlight-box {
-  position: absolute;
-  border-radius: 8px;
-  pointer-events: none;
+.het-veil {
+  fill: #fbfdfd;
+  fill-opacity: 0.88;
+}
+
+.spot-hole {
   opacity: 0;
-  transition: opacity var(--deck-dur-long) var(--deck-ease-out), transform var(--deck-dur-long) var(--deck-ease-out);
-  z-index: 2;
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-end;
-  padding: 0.25rem 0.35rem;
+  transition: opacity var(--deck-dur-long) var(--deck-ease-out);
 }
 
-.spot-label {
-  font-family: var(--deck-font-mono);
-  font-size: 0.5rem !important;
-  font-weight: 700;
-  padding: 0.1rem 0.35rem;
-  border-radius: 3px;
-  background: var(--deck-green);
-  color: #fff;
-  letter-spacing: 0.05em;
-}
-
-.spot-label.label-orange {
-  background: var(--deck-orange);
-}
-
-.spot-iid {
-  left: 38%;
-  top: 62%;
-  width: 34%;
-  height: 34%;
-  border: 2px solid var(--deck-green);
-  background: color-mix(in oklch, var(--deck-green) 14%, transparent);
-  box-shadow: 0 0 16px color-mix(in oklch, var(--deck-green) 50%, transparent);
-}
-
-.spot-non-iid {
-  left: 68%;
-  top: 62%;
-  width: 30%;
-  height: 34%;
-  border: 2px solid var(--deck-orange);
-  background: color-mix(in oklch, var(--deck-orange) 14%, transparent);
-  box-shadow: 0 0 16px color-mix(in oklch, var(--deck-orange) 50%, transparent);
-}
-
-.spotlight-box.is-active {
+.spot-hole.is-lit {
   opacity: 1;
 }
 
@@ -218,7 +217,7 @@ const currentStep = computed(() => Math.min(Math.max(0, props.click ?? 0), 3))
 }
 
 .card-non-iid {
-  right: 0.6rem;
+  left: 0.6rem;
   top: 0.6rem;
   border-left: 3px solid var(--deck-orange);
 }
@@ -247,7 +246,7 @@ const currentStep = computed(() => Math.min(Math.max(0, props.click ?? 0), 3))
   height: 0.82rem;
   border-radius: 50%;
   color: #fff;
-  font-size: 0.5rem !important;
+  font-size: 0.6rem !important;
   font-weight: 700;
 }
 
@@ -257,7 +256,7 @@ const currentStep = computed(() => Math.min(Math.max(0, props.click ?? 0), 3))
 .callout-card p {
   margin: 0;
   color: var(--deck-muted);
-  font-size: 0.57rem !important;
+  font-size: 0.6rem !important;
   line-height: 1.3;
 }
 
@@ -268,7 +267,7 @@ const currentStep = computed(() => Math.min(Math.max(0, props.click ?? 0), 3))
   padding: 0.18rem 0.45rem;
   border-radius: 14px;
   font-family: var(--deck-font-mono);
-  font-size: 0.54rem !important;
+  font-size: 0.6rem !important;
   font-weight: 700;
   letter-spacing: 0.04em;
   box-shadow: 0 2px 8px rgba(16, 32, 43, 0.14);
@@ -328,7 +327,7 @@ const currentStep = computed(() => Math.min(Math.max(0, props.click ?? 0), 3))
   background: color-mix(in oklch, var(--deck-teal) 95%, #ffffff);
   color: #ffffff;
   border-radius: 20px;
-  font-size: 0.54rem !important;
+  font-size: 0.6rem !important;
   font-weight: 600;
   white-space: nowrap;
   box-shadow: 0 4px 12px rgba(15, 76, 92, 0.28);
@@ -384,7 +383,7 @@ const currentStep = computed(() => Math.min(Math.max(0, props.click ?? 0), 3))
   background: var(--deck-line);
   color: var(--deck-ink);
   font-family: var(--deck-font-mono);
-  font-size: 0.52rem !important;
+  font-size: 0.6rem !important;
   font-weight: 700;
   transition: background 0.25s ease, color 0.25s ease;
 }
@@ -401,7 +400,7 @@ const currentStep = computed(() => Math.min(Math.max(0, props.click ?? 0), 3))
 
 .step-txt {
   font-family: var(--deck-font-mono);
-  font-size: 0.52rem !important;
+  font-size: 0.6rem !important;
   color: var(--deck-muted);
 }
 

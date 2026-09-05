@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import katex from 'katex'
+// Without KaTeX's own stylesheet the `.katex-mathml` accessibility node is not
+// clipped, so every formula renders twice: once typeset, once as raw MathML text.
+import 'katex/dist/katex.min.css'
 
 const props = defineProps<{
   math: string

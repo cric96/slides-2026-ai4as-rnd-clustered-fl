@@ -25,7 +25,7 @@ function stageClass(index: number) {
             <span class="stage-number">1</span>
             <div class="header-titles">
               <h3>LOCAL RND TRAINING</h3>
-              <p>Each device learns its own distribution</p>
+              <p>One predictor per device</p>
             </div>
           </div>
 
@@ -87,15 +87,15 @@ function stageClass(index: number) {
             <div class="stage-features">
               <div class="feature-item">
                 <span class="feature-dot teal-dot" />
-                <span><strong>Private:</strong> Raw data <MathTex math="\mathcal{B}_i" /> never shared</span>
+                <span><strong>Model:</strong> 2-layer CNN, not the task model</span>
               </div>
               <div class="feature-item">
                 <span class="feature-dot teal-dot" />
-                <span><strong>Lightweight:</strong> Tiny 2-layer CNN auxiliary model</span>
+                <span><strong>Input:</strong> the device's own samples <MathTex math="\mathcal{B}_i" /></span>
               </div>
               <div class="feature-item">
                 <span class="feature-dot teal-dot" />
-                <span><strong>Task-Agnostic:</strong> Precedes any main FL training</span>
+                <span><strong>Objective:</strong> regress the frozen random target</span>
               </div>
             </div>
           </div>
@@ -173,10 +173,6 @@ function stageClass(index: number) {
                 </div>
               </div>
             </div>
-
-            <div class="formula-strip">
-              <MathTex math="S[i, j] = s_{ij} = \mathbb{E}_{x \sim \mathcal{B}_i} \|\hat{f}_j(x) - f(x)\|_2^2" />
-            </div>
           </div>
         </div>
       </div>
@@ -189,7 +185,7 @@ function stageClass(index: number) {
             <path d="M 2 11 H 34" fill="none" stroke="var(--deck-orange)" stroke-width="2.5" stroke-linecap="round" />
             <path d="M 30 5 L 42 11 L 30 17 Z" fill="var(--deck-orange)" />
           </svg>
-          <span class="conn-sub">Adaptive Eq. (9)</span>
+          <span class="conn-sub"><MathTex math="s_{ii} + \epsilon \sigma_i" /></span>
         </div>
       </div>
 
@@ -256,11 +252,7 @@ function stageClass(index: number) {
             <div class="stage-features stage-features-tight">
               <div class="feature-item">
                 <span class="feature-dot orange-dot" />
-                <span><strong>Decoupled:</strong> Discovered once (or every <MathTex math="\tau" /> rounds)</span>
-              </div>
-              <div class="feature-item">
-                <span class="feature-dot orange-dot" />
-                <span><strong>Conflict-free:</strong> Zero interference across federations</span>
+                <span><strong>Scope:</strong> gradients averaged only within a federation</span>
               </div>
             </div>
           </div>
@@ -359,7 +351,7 @@ function stageClass(index: number) {
 
 .header-titles p {
   margin: 0;
-  font-size: 0.58rem !important;
+  font-size: 0.6rem !important;
   color: var(--deck-muted);
 }
 
@@ -497,7 +489,7 @@ function stageClass(index: number) {
 }
 
 .conn-text {
-  font-size: 0.52rem;
+  font-size: 0.6rem;
   font-weight: 700;
   letter-spacing: 0.05em;
   color: var(--deck-ink);
@@ -510,7 +502,7 @@ function stageClass(index: number) {
 }
 
 .conn-sub {
-  font-size: 0.5rem;
+  font-size: 0.6rem;
   color: var(--deck-muted);
   white-space: nowrap;
 }
@@ -572,7 +564,7 @@ function stageClass(index: number) {
 .tile {
   display: grid;
   place-items: center;
-  font-size: 0.58rem;
+  font-size: 0.6rem;
   font-family: var(--deck-font-mono);
   font-weight: 600;
   border-radius: 2px;
@@ -601,7 +593,7 @@ function stageClass(index: number) {
   display: flex;
   align-items: center;
   gap: 0.35rem;
-  font-size: 0.58rem;
+  font-size: 0.6rem;
   line-height: 1.25;
 }
 
@@ -620,16 +612,6 @@ function stageClass(index: number) {
 .swatch-off {
   background: rgba(217, 119, 6, 0.18);
   border: 1.5px solid var(--deck-orange);
-}
-
-.formula-strip {
-  text-align: center;
-  font-size: 0.7rem;
-  background: #f8fafb;
-  border: 1px solid var(--deck-line);
-  border-radius: 4px;
-  padding: 0.25rem 0.4rem;
-  color: var(--deck-teal);
 }
 
 /* ─── Stage 3: Federations Stack ─── */
@@ -759,7 +741,7 @@ function stageClass(index: number) {
 }
 
 .loop-tag {
-  font-size: 0.54rem;
+  font-size: 0.6rem;
   font-weight: 600;
   color: var(--deck-muted);
   white-space: nowrap;

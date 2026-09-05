@@ -53,7 +53,6 @@ body,
 }
 
 .slidev-layout.stage-slide,
-.slidev-layout.code-slide,
 .slidev-layout.viz-slide,
 .slidev-layout.end-slide,
 .slidev-layout.deck-cover,
@@ -94,6 +93,12 @@ body,
 .slidev-layout a {
   color: var(--deck-teal);
   text-decoration: none;
+}
+
+/* The default theme puts a dashed border-bottom on links, which reads as a
+   stray rule under the QR card rather than as a link affordance. */
+.slidev-layout a.qr-card-link-wrapper {
+  border-bottom: none;
 }
 
 .slidev-layout ul {
@@ -657,13 +662,6 @@ body,
   transition: border-color 0.25s ease, background-color 0.25s ease, transform 0.25s ease;
 }
 
-.inline-note.highlight-step {
-  border-left-color: var(--deck-orange);
-  background: color-mix(in oklch, var(--deck-orange) 12%, #ffffff);
-  color: var(--deck-ink);
-  transform: translateX(3px);
-}
-
 .inline-note.highlight-angle {
   border-left-color: var(--deck-teal);
   background: color-mix(in oklch, var(--deck-teal) 12%, #ffffff);
@@ -765,7 +763,6 @@ body,
 }
 
 .stage-slide,
-.code-slide,
 .viz-slide,
 .end-slide {
   padding-top: 0;
@@ -1063,17 +1060,6 @@ body,
   font-size: 0.86rem !important;
 }
 
-.algorithm-slide {
-  gap: 0.55rem;
-}
-
-.algorithm-slide .shiki,
-.algorithm-slide pre {
-  margin: 0;
-  font-size: 0.72rem;
-  line-height: 1.34;
-}
-
 .discovery-cadence {
   margin-top: 0.4rem;
   padding: 0.28rem 0.5rem 0.35rem;
@@ -1288,6 +1274,58 @@ body,
   gap: 1.2rem;
   padding-top: 0.75rem;
   border-top: 1px solid var(--deck-line);
+}
+
+/* Closing slide. Two claim cards answer the two halves of the research
+   question ("effective" and "lightweight"), then the open directions, then
+   the takeaway next to the QR. */
+.closing-claims {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.6rem;
+  margin-top: 0.35rem;
+}
+
+.closing-claims .conclusion-item h3 {
+  margin: 0.1rem 0 0.4rem;
+  font-size: 1.02rem;
+  line-height: 1.25;
+}
+
+.closing-claims .conclusion-item p {
+  font-size: 0.8rem;
+}
+
+.open-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.2rem;
+  margin-top: 0.5rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--deck-line);
+}
+
+.open-grid p {
+  margin: 0;
+  color: var(--deck-muted);
+  font-size: 0.74rem;
+  line-height: 1.38;
+}
+
+.closing-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.1rem;
+  margin-top: 0.6rem;
+}
+
+.closing-cta p {
+  max-width: 24rem;
+  margin: 0;
+  color: var(--deck-ink);
+  font-size: 0.82rem;
+  line-height: 1.4;
 }
 
 .future-grid p {
@@ -1654,4 +1692,36 @@ body,
 .scale-arrow-svg {
   width: 1.8rem;
   height: 1.2rem;
+}
+
+/* KaTeX renders as deeply nested <span>s. The generic `.slidev-layout span`
+   sizing above hits every one of them and blows the formula up to 0.97rem
+   regardless of the surrounding text size. Same specificity, declared later,
+   so KaTeX's own `.katex .sizing` rules (0,2,0) still win for scripts. */
+.katex span {
+  font-size: inherit;
+}
+
+/* Cover affiliation lockups. Both PNGs were alpha-cut and cropped to their
+   content, so a shared height lines the UniBo seal up with the Trinity shield.
+   (Do not use mix-blend-mode here: Slidev's PDF export drops it and the white
+   PNG ground reappears as a visible box.) */
+.cover-affiliations {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.6rem;
+  margin-top: 1rem;
+}
+
+.affiliation-logo {
+  width: auto;
+  height: 3rem;
+  object-fit: contain;
+}
+
+.affiliation-divider {
+  width: 1px;
+  height: 2.4rem;
+  background: var(--deck-line);
 }
