@@ -87,7 +87,7 @@ class: stage-slide top-slide
 
 # Federated learning - Standard paradigm
 
-> a distributed learning paradigm where devices train a shared model collaboratively without sharing their raw data.
+> a distributed learning paradigm where devices train a shared model collaboratively without sharing their raw data. <Cite n="1" />
 
 <FederatedLearning :click="$clicks" />
 <div v-click="1" class="click-marker" /><div v-click="2" class="click-marker" /><div v-click="3" class="click-marker" />
@@ -119,7 +119,7 @@ class: viz-slide
 
 - Different zones, different **feature distributions**: cars, speeds, flow patterns.
 - Local updates then optimize **different objectives**, on the very same task.
-- Averaging conflicting updates degrades FedAvg: the **non-IID problem**.
+- Averaging conflicting updates degrades FedAvg: the **non-IID problem**. <Cite n="2" />
 
 <div class="inline-note angle-note" :class="{ 'highlight-angle': ($clicks || 0) >= 3 }">
   <strong>This work:</strong> average only within groups of devices whose distributions already agree.
@@ -153,7 +153,7 @@ class: stage-slide
 
 ## Specializing models by device group
 
-> Devices with similar distributions share one model per cluster, instead of one global average.
+> Devices with similar distributions share one model per cluster, instead of one global average. <Cite n="3,4" />
 
 <ClusteredFL :click="$clicks" />
 <div v-click="1" class="click-marker" /><div v-click="2" class="click-marker" />
@@ -183,11 +183,12 @@ class: stage-slide top-slide
 
 <div class="comparison-grid bottleneck-grid">
   <div class="comparison-card">
-    <div class="card-title">IFCA</div>
-    <div class="card-text"><strong>Assume <MathTex math="K" /> is known.</strong><br>Every device evaluates all <MathTex math="K" /> full task models at every round, then joins the best one.</div>
+    <div class="card-title">IFCA <Cite n="3" /></div>
+    <div class="card-text"><strong>Assume the number of federations
+     is known.</strong><br>Every device evaluates all <MathTex math="K" /> full task models at every round, then joins the best one.</div>
   </div>
   <div class="comparison-card">
-    <div class="card-title">Self-FL / PSFL</div>
+    <div class="card-title">Self-FL / PSFL <Cite n="4" /></div>
     <div class="card-text"><strong>Let groups emerge.</strong><br>Peers exchange full task models and estimate compatibility via pairwise validation losses.</div>
   </div>
   <div class="comparison-card highlight">
@@ -260,7 +261,7 @@ class: stage-slide
 
 # Random Network Distillation
 
-## Prediction error as a novelty signal
+## Prediction error as a novelty signal <Cite n="5" />
 
 <RNDMechanism :click="$clicks" />
 <div v-click="1" class="click-marker" /><div v-click="2" class="click-marker" />
@@ -349,23 +350,23 @@ class: viz-slide
   <div class="contribution-item teal-top">
     <div class="contribution-number">01</div>
     <h3>Decentralized setup</h3>
-    <p><strong>CIFAR-10 benchmark</strong> with <MathTex math="N = 12" /> devices solving the same 10-class task on local data <MathTex math="\mathcal{B}_i" />.</p>
+    <p><strong>CIFAR-10 benchmark</strong> <Cite n="6" /> with <MathTex math="N = 12" /> devices solving the same 10-class task on local data <MathTex math="\mathcal{B}_i" />.</p>
   </div>
   <div class="contribution-item orange-top">
     <div class="contribution-number">02</div>
-    <h3>Clustered feature skew</h3>
+    <h3>Clustered feature skew <Cite n="7" /></h3>
     <p><MathTex math="k = 4" /> latent groups (3 devices each): identical <MathTex math="P_i(y)" />, but a <strong>different Gaussian noise</strong> per group shifts <MathTex math="P_i(x|y)" />.</p>
   </div>
   <div class="contribution-item green-top">
     <div class="contribution-number">03</div>
     <h3>Baseline</h3>
-    <p>Evaluated against <strong>IFCA</strong> (full ResNet-18 task model evaluations), averaged across <strong>10 independent seeds</strong>.</p>
+    <p>Evaluated against <strong>IFCA</strong> <Cite n="3" /> (full ResNet-18 <Cite n="8" /> task model evaluations), averaged across <strong>10 independent seeds</strong>.</p>
   </div>
 </div>
 
 <p class="centered-claim">The <MathTex math="k = 4" /> groups are fixed by construction, so the recovered partition can be scored <strong>directly against ground truth</strong>.</p>
 
-<Cites refs="6,7,8" />
+<Cites refs="3,6,7,8" />
 
 </div>
 
@@ -386,16 +387,8 @@ class: viz-slide
 
 ## Novelty matrix recovers the latent group structure
 
-<div class="result-pair">
-  <div class="paper-figure-shell result-figure">
-    <BaseImg src="figures/uncertainty_difference_heatmap.png" alt="Heatmap of self versus cross novelty across twelve devices" class="paper-figure contain" />
-  </div>
-  <div class="paper-figure-shell result-figure bar-figure">
-    <BaseImg src="figures/diagonal_vs_offdiagonal_barplot.png" alt="Mean novelty for own device, same group, and different group" class="paper-figure contain" />
-  </div>
-</div>
-
-<div class="result-takeaway"><strong>Near-zero blocks on the diagonal</strong> mark devices from the same group; novelty rises sharply at every group boundary, reproducing the <MathTex math="k = 4" /> partition used to build the benchmark.</div>
+<NoveltyMatrix :click="$clicks" />
+<div v-click="1" class="click-marker" /><div v-click="2" class="click-marker" /><div v-click="3" class="click-marker" />
 
 </div>
 
@@ -468,8 +461,8 @@ transition: fade
     <p>Beyond 12 devices and synthetic skew: larger, real-world sensing deployments.</p>
   </div>
   <div>
-    <span class="eyebrow">Robustness</span>
-    <p>Self-adaptive <MathTex math="\epsilon" />, and Byzantine, Sybil, and masquerade attacks.</p>
+    <span class="eyebrow">Tolerance</span>
+    <p><MathTex math="\epsilon" /> sets the granularity: too small over-fragments compatible devices, too large merges different ones. Sensitivity analysis and self-adaptive tuning are open.</p>
   </div>
 </div>
 
@@ -482,4 +475,27 @@ transition: fade
 
 <!-- [Sources]
 Conclusions, limitations, future work, and code repository: supplied manuscript, Discussion and Conclusions and Future Work.
+Tolerance item: manuscript, Novelty Driven Clustering — "The tolerance parameter epsilon controls the granularity of the
+discovered partition... We leave a systematic sensitivity analysis and the investigation of self-adaptive tuning mechanisms
+for future work."
+-->
+
+---
+layout: default
+class: stage-slide top-slide
+---
+
+<div class="slide-shell">
+
+# References
+
+## Numbered as cited throughout the deck
+
+<References />
+
+</div>
+
+<!-- [Sources]
+Bibliography rendered from components/bibliography.ts, the single source of truth
+shared by the inline <Cite> markers and the per-slide <Cites> footnotes.
 -->

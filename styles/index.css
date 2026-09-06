@@ -637,12 +637,16 @@ body,
   color: var(--deck-teal);
 }
 
+/* Inline citation marker emitted by <Cite n="…" />: sits directly on the claim
+   it supports, matching the numbered footnote produced by <Cites refs="…" />. */
 .cite {
-  font-size: 0.62em;
-  font-weight: 600;
+  font-size: 0.6em;
+  font-weight: 700;
   color: var(--deck-orange);
   vertical-align: super;
-  margin-left: 0.1em;
+  margin-left: 0.12em;
+  white-space: nowrap;
+  cursor: help;
 }
 
 .inline-note.center-note {

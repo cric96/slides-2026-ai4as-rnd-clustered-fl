@@ -7,6 +7,15 @@ const props = defineProps<{
 
 const currentStep = computed(() => Math.min(Math.max(0, props.click ?? 0), 3))
 
+// Exporting with clicks renders every click step of a slide into the SAME
+// document, so a fixed SVG id would be duplicated and url(#...) would always
+// resolve to the first copy — the one with no lit region. Per-instance ids keep
+// each step's spotlight pointing at its own mask.
+let seq = 0
+const uid = `het-${(seq += 1, seq)}-${Math.random().toString(36).slice(2, 8)}`
+const holeId = `${uid}-hole`
+const maskId = `${uid}-veil`
+
 /* Ellipses tracing the four coloured blobs of figures/heterogeneity.png
    (1620 x 971), plus a patch over the figure's own Non-IID arrow. */
 const zones = [
@@ -51,12 +60,12 @@ const litZones = computed(() => {
         aria-hidden="true"
       >
         <defs>
-          <radialGradient id="het-hole">
+          <radialGradient :id="holeId">
             <stop offset="0%" stop-color="#000" stop-opacity="1" />
             <stop offset="64%" stop-color="#000" stop-opacity="1" />
             <stop offset="100%" stop-color="#000" stop-opacity="0" />
           </radialGradient>
-          <mask id="het-veil-mask">
+          <mask :id="maskId">
             <rect x="0" y="0" width="1620" height="971" fill="#fff" />
             <ellipse
               v-for="z in zones"
@@ -64,11 +73,11 @@ const litZones = computed(() => {
               class="spot-hole"
               :class="{ 'is-lit': litZones.includes(z.id) }"
               :cx="z.cx" :cy="z.cy" :rx="z.rx" :ry="z.ry"
-              fill="url(#het-hole)"
+              :fill="`url(#${holeId})`"
             />
           </mask>
         </defs>
-        <rect class="het-veil" x="0" y="0" width="1620" height="971" mask="url(#het-veil-mask)" />
+        <rect class="het-veil" x="0" y="0" width="1620" height="971" :mask="`url(#${maskId})`" />
       </svg>
       <div class="callout-card card-iid" :class="{ 'is-active': currentStep === 1 }">
         <div class="card-tag tag-green">

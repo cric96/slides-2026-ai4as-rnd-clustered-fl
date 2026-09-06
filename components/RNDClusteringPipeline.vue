@@ -87,7 +87,7 @@ function stageClass(index: number) {
             <div class="stage-features">
               <div class="feature-item">
                 <span class="feature-dot teal-dot" />
-                <span><strong>Model:</strong> 2-layer CNN, not the task model</span>
+                <span><strong>Model:</strong> not the task model (typically smaller and faster)</span>
               </div>
               <div class="feature-item">
                 <span class="feature-dot teal-dot" />
