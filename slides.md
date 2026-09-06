@@ -489,8 +489,6 @@ class: stage-slide top-slide
 
 # References
 
-## Numbered as cited throughout the deck
-
 <References />
 
 </div>
