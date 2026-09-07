@@ -1387,170 +1387,6 @@ body,
   font-weight: 500;
 }
 
-/* Thanks / End Slide Collage and Layout Styles */
-.thanks-grid {
-  display: grid;
-  grid-template-columns: 1fr 1.35fr;
-  gap: 2.5rem;
-  align-items: center;
-  height: 100%;
-  margin-top: 1rem;
-}
-
-.thanks-left {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding-right: 0.5rem;
-}
-
-.slidev-layout .thanks-title {
-  font-size: 3.6rem;
-  font-weight: 800;
-  letter-spacing: -0.04em;
-  background: linear-gradient(135deg, var(--deck-teal) 0%, #ca5b01 50%, var(--deck-green) 100%);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin-top: 0.2rem;
-  margin-bottom: 0.4rem;
-}
-
-.thanks-subtitle {
-  font-size: 1.05rem;
-  color: var(--deck-muted);
-  margin-bottom: 1.2rem;
-  line-height: 1.5;
-}
-
-.thanks-qr-row {
-  display: flex;
-  gap: 1.1rem;
-  justify-content: center;
-  margin-bottom: 1rem;
-}
-
-.thanks-details {
-  font-size: 0.82rem;
-  color: var(--deck-muted);
-  background: rgba(255, 255, 255, 0.72);
-  padding: 0.55rem 1.1rem;
-  border-radius: 2rem;
-  border: 1px solid rgba(16, 32, 43, 0.06);
-}
-
-.collage-container {
-  position: relative;
-  width: 100%;
-  height: 23rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.collage-item {
-  position: absolute;
-  background: #ffffff;
-  padding: 0.55rem;
-  border-radius: 0.85rem;
-  box-shadow: 0 14px 38px rgba(15, 23, 42, 0.08);
-  border: 1px solid rgba(16, 32, 43, 0.06);
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  display: flex;
-  flex-direction: column;
-}
-
-.collage-item:hover {
-  transform: translateY(-8px) scale(1.05) rotate(0deg) !important;
-  z-index: 10 !important;
-  box-shadow: 0 24px 50px rgba(15, 76, 92, 0.16);
-  border-color: rgba(15, 76, 92, 0.25);
-}
-
-.collage-arch {
-  width: 13rem;
-  height: auto;
-  left: -2rem;
-  top: 4.5rem;
-  transform: rotate(-6deg);
-  z-index: 1;
-}
-
-.collage-gradient {
-  width: 10rem;
-  height: 10rem;
-  left: 7.5rem;
-  top: 0.5rem;
-  transform: rotate(4deg);
-  z-index: 2;
-}
-
-.collage-frame1 {
-  width: 8.5rem;
-  height: 8.5rem;
-  left: 10.5rem;
-  top: 12rem;
-  transform: rotate(-3deg);
-  z-index: 3;
-}
-
-.collage-channel {
-  width: 10rem;
-  height: 10rem;
-  left: 17.5rem;
-  top: 0rem;
-  transform: rotate(5deg);
-  z-index: 4;
-}
-
-.collage-frame885 {
-  width: 8.5rem;
-  height: 8.5rem;
-  right: 0.75rem;
-  top: 11.5rem;
-  transform: rotate(-4deg);
-  z-index: 5;
-}
-
-.collage-scale-wrapper {
-  transform: scale(0.49);
-  transform-origin: top left;
-  width: 18rem;
-  height: 18rem;
-  border-radius: 0.4rem;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.collage-channel .channel-stages {
-  display: none !important;
-}
-
-.collage-img {
-  width: 100%;
-  aspect-ratio: auto;
-  border-radius: 0.5rem;
-  object-fit: cover;
-}
-
-.collage-frame1 .collage-img,
-.collage-frame885 .collage-img {
-  aspect-ratio: 1;
-  width: 100%;
-  height: 100%;
-}
-
-.collage-label {
-  font-size: 0.66rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: #52616d;
-  font-weight: 600;
-  margin-top: 0.45rem;
-  text-align: center;
-}
-
 /* ─── Slide 9: From Novelty to Compatibility ─── */
 .compatibility-hero-grid {
   display: grid;
@@ -1728,4 +1564,107 @@ body,
   width: 1px;
   height: 2.4rem;
   background: var(--deck-line);
+}
+
+/* Closing "Thank you" slide. <ThankYouScene /> paints the tilted roads and the
+   scattered figure prints behind; this panel keeps the words readable on top
+   of that texture, so it carries its own light backdrop rather than relying on
+   the page background. */
+.thanks-slide {
+  overflow: hidden;
+}
+
+.thanks-shell {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 33rem);
+  margin: 0 auto;
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  text-align: center;
+  padding: 1.5rem 2rem 1.2rem;
+  background: rgba(247, 250, 251, 0.9);
+  border: 1px solid rgba(16, 32, 43, 0.08);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(2px);
+}
+
+.thanks-kicker {
+  margin: 0;
+  font-size: 0.7rem !important;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--deck-muted);
+}
+
+.thanks-slide h1.thanks-title {
+  margin: 0;
+  font-size: 3.4rem;
+  line-height: 1;
+  letter-spacing: -0.055em;
+}
+
+.thanks-claim {
+  margin: 0;
+  font-size: 1rem !important;
+  color: var(--deck-ink);
+}
+
+.thanks-rule {
+  width: 5rem;
+  height: 0.2rem;
+  background: var(--deck-orange);
+  margin: 0.15rem 0 0.1rem;
+}
+
+.thanks-meta {
+  display: grid;
+  gap: 0.2rem;
+  color: var(--deck-muted);
+  font-size: 0.78rem !important;
+}
+
+.thanks-meta span,
+.thanks-meta a {
+  font-size: 0.78rem !important;
+}
+
+.thanks-meta a {
+  font-family: var(--deck-font-mono);
+  border-bottom: none;
+}
+
+.thanks-cta {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-top: 0.35rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--deck-line);
+  text-align: left;
+}
+
+.thanks-ask {
+  margin: 0;
+  max-width: 17rem;
+  font-size: 0.76rem !important;
+  line-height: 1.4;
+  color: var(--deck-muted);
+}
+
+.thanks-logos {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2rem;
+  margin-top: 0.5rem;
+}
+
+.thanks-logos .affiliation-logo {
+  height: 2.1rem;
+}
+
+.thanks-logos .affiliation-divider {
+  height: 1.7rem;
 }

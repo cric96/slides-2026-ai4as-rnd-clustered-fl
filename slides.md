@@ -482,6 +482,42 @@ for future work."
 
 ---
 layout: default
+class: end-slide thanks-slide
+transition: fade
+---
+
+<ThankYouScene />
+
+<div class="thanks-shell">
+
+  <p class="thanks-kicker">AI4AS 2026 · Trinity College Dublin</p>
+
+  <h1 class="thanks-title">Thank you</h1>
+
+  <p class="thanks-claim">Let novelty tell the junctions <strong>who to learn with</strong>.</p>
+
+  <div class="thanks-rule" />
+
+  <div class="thanks-meta">
+    <span>Davide Domini · <strong>Gianluca Aguzzi</strong> · Ivana Dusparic · Danilo Pianini · Mirko Viroli</span>
+    <a href="mailto:gianluca.aguzzi@unibo.it">gianluca.aguzzi@unibo.it</a>
+  </div>
+
+  <div class="thanks-cta">
+    <QrCard title="Code & Experiments" url="https://github.com/domm99/experiments-2026-uncertainty-based-clustered-fl" :size="3" />
+    <p class="thanks-ask">Questions welcome — especially on <strong>cadence</strong>, the tolerance <MathTex math="\epsilon" />, and going <strong>decentralized</strong>.</p>
+  </div>
+
+  <div class="thanks-logos">
+    <BaseImg src="figures/logo-unibo.png" alt="Alma Mater Studiorum — Università di Bologna" class="affiliation-logo logo-unibo" />
+    <span class="affiliation-divider" aria-hidden="true" />
+    <BaseImg src="figures/logo-trinity.png" alt="Trinity College Dublin, The University of Dublin" class="affiliation-logo logo-trinity" />
+  </div>
+
+</div>
+
+---
+layout: default
 class: stage-slide top-slide
 ---
 
@@ -496,4 +532,11 @@ class: stage-slide top-slide
 <!-- [Sources]
 Bibliography rendered from components/bibliography.ts, the single source of truth
 shared by the inline <Cite> markers and the per-slide <Cites> footnotes.
+-->
+
+---
+
+<!-- [Sources]
+Closing slide: no new claims. Title, authors, and affiliations from the supplied manuscript;
+repository link as on the Conclusions slide; figures reused as decoration from public/figures.
 -->
